@@ -1,0 +1,8 @@
+{
+    "name": "appmixer.vercel",
+    "label": "Vercel",
+    "category": "applications",
+    "description": "Vercel is a cloud platform for static and JAMstack applications, providing serverless functions and global CDN.",
+    "version": "1.0.0",
+    "icon": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjU2IiBoZWlnaHQ9IjIyMSIgdmlld0JveD0iMCAwIDI1NiAyMjEiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNMTI4IDAgTDI1NiAyMjEgSCAwIEwxMjggMCBaIiBmaWxsPSJibGFjayIvPgo8L3N2Zz4K"
+}

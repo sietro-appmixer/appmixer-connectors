@@ -1,0 +1,93 @@
+{
+    "name": "appmixer.vercel.core.ListTeamMembers",
+    "author": "Appmixer <info@appmixer.com>",
+    "description": "Get a list of members for a specific team.",
+    "auth": {
+        "service": "appmixer:vercel"
+    },
+    "quota": {
+        "manager": "appmixer:vercel",
+        "resources": "requests",
+        "scope": {
+            "userId": "{{userId}}"
+        }
+    },
+    "inPorts": [
+        {
+            "name": "in",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "teamId": {
+                        "type": "string",
+                        "description": "The Team's unique identifier."
+                    },
+                    "limit": {
+                        "type": "number",
+                        "description": "Maximum number of members which may be returned.",
+                        "minimum": 1,
+                        "maximum": 100
+                    },
+                    "since": {
+                        "type": "number",
+                        "description": "Timestamp (in milliseconds) to only include members added since then."
+                    },
+                    "until": {
+                        "type": "number",
+                        "description": "Timestamp (in milliseconds) to only include members added until then."
+                    }
+                },
+                "required": ["teamId"]
+            },
+            "inspector": {
+                "inputs": {
+                    "teamId": {
+                        "type": "text",
+                        "index": 1,
+                        "label": "Team ID",
+                        "tooltip": "The Team's unique identifier (e.g., team_nllPyCtREAqxxdyFKbbMDlxd)."
+                    },
+                    "limit": {
+                        "type": "number",
+                        "index": 2,
+                        "label": "Limit",
+                        "tooltip": "Maximum number of members which may be returned (1-100)."
+                    },
+                    "since": {
+                        "type": "number",
+                        "index": 3,
+                        "label": "Since (timestamp)",
+                        "tooltip": "Timestamp in milliseconds to only include members added since then."
+                    },
+                    "until": {
+                        "type": "number",
+                        "index": 4,
+                        "label": "Until (timestamp)",
+                        "tooltip": "Timestamp in milliseconds to only include members added until then."
+                    }
+                }
+            }
+        }
+    ],
+    "outPorts": [
+        {
+            "name": "out",
+            "options": [
+                { "label": "Members", "value": "members" },
+                { "label": "Pagination", "value": "pagination" },
+                { "label": "Member ID", "value": "members.uid" },
+                { "label": "Member Username", "value": "members.username" },
+                { "label": "Member Email", "value": "members.email" },
+                { "label": "Member Name", "value": "members.name" },
+                { "label": "Member Role", "value": "members.role" },
+                { "label": "Member Avatar", "value": "members.avatar" },
+                { "label": "Confirmed", "value": "members.confirmed" },
+                { "label": "Confirmed At", "value": "members.confirmedAt" },
+                { "label": "Created At", "value": "members.createdAt" },
+                { "label": "Pagination Count", "value": "pagination.count" },
+                { "label": "Pagination Next", "value": "pagination.next" },
+                { "label": "Pagination Previous", "value": "pagination.prev" }
+            ]
+        }
+    ]
+}

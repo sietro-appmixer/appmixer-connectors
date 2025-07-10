@@ -1,0 +1,82 @@
+{
+    "name": "appmixer.vercel.core.ListTeams",
+    "author": "Appmixer <info@appmixer.com>",
+    "description": "Get a paginated list of all the Teams the authenticated User is a member of.",
+    "auth": {
+        "service": "appmixer:vercel"
+    },
+    "quota": {
+        "manager": "appmixer:vercel",
+        "resources": "requests",
+        "scope": {
+            "userId": "{{userId}}"
+        }
+    },
+    "inPorts": [
+        {
+            "name": "in",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "limit": {
+                        "type": "number",
+                        "description": "Maximum number of Teams which may be returned.",
+                        "minimum": 1,
+                        "maximum": 100
+                    },
+                    "since": {
+                        "type": "number",
+                        "description": "Timestamp (in milliseconds) to only include Teams created since then."
+                    },
+                    "until": {
+                        "type": "number", 
+                        "description": "Timestamp (in milliseconds) to only include Teams created until then."
+                    }
+                }
+            },
+            "inspector": {
+                "inputs": {
+                    "limit": {
+                        "type": "number",
+                        "index": 1,
+                        "label": "Limit",
+                        "tooltip": "Maximum number of Teams which may be returned (1-100)."
+                    },
+                    "since": {
+                        "type": "number",
+                        "index": 2,
+                        "label": "Since (timestamp)",
+                        "tooltip": "Timestamp in milliseconds to only include Teams created since then."
+                    },
+                    "until": {
+                        "type": "number",
+                        "index": 3,
+                        "label": "Until (timestamp)",
+                        "tooltip": "Timestamp in milliseconds to only include Teams created until then."
+                    }
+                }
+            }
+        }
+    ],
+    "outPorts": [
+        {
+            "name": "out",
+            "options": [
+                { "label": "Teams", "value": "teams" },
+                { "label": "Pagination", "value": "pagination" },
+                { "label": "Team ID", "value": "teams.id" },
+                { "label": "Team Name", "value": "teams.name" },
+                { "label": "Team Slug", "value": "teams.slug" },
+                { "label": "Creator ID", "value": "teams.creatorId" },
+                { "label": "Created At", "value": "teams.createdAt" },
+                { "label": "Updated At", "value": "teams.updatedAt" },
+                { "label": "Description", "value": "teams.description" },
+                { "label": "Avatar", "value": "teams.avatar" },
+                { "label": "User Role", "value": "teams.membership.role" },
+                { "label": "Pagination Count", "value": "pagination.count" },
+                { "label": "Pagination Next", "value": "pagination.next" },
+                { "label": "Pagination Previous", "value": "pagination.prev" }
+            ]
+        }
+    ]
+}
