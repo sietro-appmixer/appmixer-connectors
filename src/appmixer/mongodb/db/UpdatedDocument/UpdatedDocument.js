@@ -107,7 +107,7 @@ module.exports = {
                 await processDocuments({ lock, client, context, storeId });
             }
         } finally {
-            lock && await lock.unlock();
+            await lock?.unlock();
         }
     }
 };

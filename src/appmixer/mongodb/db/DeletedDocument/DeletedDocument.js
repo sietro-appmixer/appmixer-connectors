@@ -113,7 +113,7 @@ module.exports = {
             }
         } finally {
             await client.close();
-            lock && await lock.unlock();
+            await lock?.unlock();
         }
     }
 };

@@ -21,7 +21,7 @@ module.exports = {
             return context.sendJson(data, 'deal');
 
         } catch (err) {
-            if (err.status || (err.response && err.response.status) === 404) {
+            if (err.status || err.response?.status === 404) {
                 return context.sendJson({  dealId  }, 'notFound');
             }
             throw err;

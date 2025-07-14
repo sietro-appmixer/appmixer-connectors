@@ -26,7 +26,7 @@ module.exports = {
             auth
         });
 
-        if (connectionId && MONGO_CONNECTOR_OPEN_CONNECTIONS[connectionId]) {
+        if (connectionId && MONGO_CONNECTOR_OPEN_CONNECTIONS?.[connectionId]) {
             return {
                 client: MONGO_CONNECTOR_OPEN_CONNECTIONS[connectionId],
                 connectionId
@@ -158,7 +158,7 @@ module.exports = {
             const jsonDoc = JSON.parse(JSON.stringify(doc));
             await context.store.set(storeId, jsonDoc['_id'], jsonDoc);
             if (docIds) docIds.push(jsonDoc['_id']);
-            if (lock) lock.extend(parseInt(context.config.lockExtendTime, 10) || 1000 * 60 * 2);
+            lock?.extend(parseInt(context.config.lockExtendTime, 10) || 1000 * 60 * 2);
         }
     },
 

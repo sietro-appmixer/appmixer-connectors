@@ -48,7 +48,7 @@ module.exports = {
                     conn = await getClientForAuth(context);
                     return true;
                 } finally {
-                    conn && await conn.close();
+                    await conn?.close();
                 }
             }
         };

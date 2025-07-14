@@ -160,7 +160,7 @@ module.exports = {
 
     filesToSelectArray(files) {
 
-        if (files && Array.isArray(files)) {
+        if (Array.isArray(files)) {
             return files.map((file) => ({
                 label: file.name,
                 value: file.id
