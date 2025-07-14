@@ -18,7 +18,7 @@ module.exports = {
         if (diff.length) {
             await Promise.all(diff.map(stargazer => {
                 return context.sendJson(stargazer, 'stargazer');
-            
+
             }));
         }
 

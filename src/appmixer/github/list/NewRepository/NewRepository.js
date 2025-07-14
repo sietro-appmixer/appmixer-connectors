@@ -17,7 +17,7 @@ module.exports = {
         if (diff.length) {
             await Promise.all(diff.map(repo => {
                 return context.sendJson(repo, 'out');
-            
+
             }));
         }
 

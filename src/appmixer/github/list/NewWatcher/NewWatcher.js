@@ -18,7 +18,7 @@ module.exports = {
         if (diff.length) {
             await Promise.all(diff.map(watcher => {
                 return context.sendJson(watcher, 'out');
-            
+
             }));
         }
 

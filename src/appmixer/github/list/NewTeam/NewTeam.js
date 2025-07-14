@@ -15,7 +15,7 @@ module.exports = {
         if (diff.length) {
             await Promise.all(diff.map(team => {
                 return context.sendJson(team, 'out');
-            
+
             }));
         }
         await context.saveState({ known: actual });

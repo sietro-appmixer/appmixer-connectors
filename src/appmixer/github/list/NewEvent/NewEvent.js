@@ -20,7 +20,7 @@ module.exports = {
         if (diff.length) {
             await Promise.all(diff.map(event => {
                 return context.sendJson(event, 'event');
-            
+
             }));
         }
         await context.saveState({ known: actual });

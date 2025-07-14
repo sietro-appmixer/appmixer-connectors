@@ -17,7 +17,7 @@ module.exports = {
         if (diff.length) {
             await Promise.all(diff.map(label => {
                 return context.sendJson(label, 'label');
-            
+
             }));
         }
         await context.saveState({ known: actual });
