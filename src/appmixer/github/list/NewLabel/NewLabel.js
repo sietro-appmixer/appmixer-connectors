@@ -1,6 +1,5 @@
 'use strict';
 const lib = require('../../lib');
-const Bluebird = require('bluebird');
 
 /**
  * Component which triggers whenever new label is created
@@ -16,9 +15,10 @@ module.exports = {
         const { diff, actual } = lib.getNewItems(known, res.data, 'id');
 
         if (diff.length) {
-            await Bluebird.map(diff, label => {
+            await Promise.all(diff.map(label => {
                 return context.sendJson(label, 'label');
-            });
+            
+            }));
         }
         await context.saveState({ known: actual });
     }

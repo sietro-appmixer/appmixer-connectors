@@ -1,6 +1,5 @@
 'use strict';
 const lib = require('../../lib');
-const Bluebird = require('bluebird');
 
 /**
  * Component which triggers whenever new commit is created
@@ -23,7 +22,7 @@ module.exports = {
 
         const { diff, actual } = lib.getNewItems(known, res.data, 'sha');
         if (diff.length) {
-            await Bluebird.map(diff, commit => context.sendJson(commit, 'commit'));
+            await Promise.all(diff.map(commit => context.sendJson(commit, 'commit')));
         }
         await context.saveState({ known: actual });
     }
