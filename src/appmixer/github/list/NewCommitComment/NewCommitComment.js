@@ -1,6 +1,6 @@
 'use strict';
 const lib = require('../../lib');
-const Promise = require('bluebird');
+const Bluebird = require('bluebird');
 
 /**
  * Component which triggers whenever new comment on a commit is created
@@ -19,7 +19,7 @@ module.exports = {
         const { diff, actual } = lib.getNewItems(known, res.data, 'sha');
 
         if (diff.length) {
-            await Promise.map(diff, comment => {
+            await Bluebird.map(diff, comment => {
                 return context.sendJson(comment, 'comment');
             });
         }
