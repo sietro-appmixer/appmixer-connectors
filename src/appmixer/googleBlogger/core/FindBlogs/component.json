@@ -1,15 +1,15 @@
 {
-    "name": "appmixer.google.blogger.FindBlogs",
+    "name": "appmixer.googleBlogger.core.FindBlogs",
     "author": "Appmixer <info@appmixer.com>",
     "description": "The FindBlogs endpoint allows users to search for blogs on the Blogger platform using various query parameters.",
     "version": "1.0.0",
     "private": false,
     "auth": {
-        "service": "appmixer:google:blogger",
+        "service": "appmixer:googleBlogger",
         "scope": ["https://www.googleapis.com/auth/blogger"]
     },
     "quota": {
-        "manager": "appmixer:google:blogger",
+        "manager": "appmixer:googleBlogger",
         "resources": "requests"
     },
     "inPorts": [
@@ -86,7 +86,7 @@
         {
             "name": "out",
             "source": {
-                "url": "/component/appmixer/google/blogger/FindBlogs?outPort=out",
+                "url": "/component/appmixer/googleBlogger/FindBlogs?outPort=out",
                 "data": {
                     "properties": {
                         "generateOutputPortOptions": true
