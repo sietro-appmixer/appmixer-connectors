@@ -41,7 +41,7 @@ module.exports = {
             const sources = component.source;
             Object.keys(sources || {}).forEach((inPort) => {
                 const source = sources[inPort];
-                if (source[agentComponentId] && source[agentComponentId].includes(toolsPort)) {
+                if (source[agentComponentId]?.includes(toolsPort)) {
                     tools[componentId] = component;
                     if (component.type !== 'appmixer.ai.agenttools.ToolStart') {
                         error = `Component ${componentId} is not of type 'ToolStart' but ${component.type}.
@@ -118,7 +118,7 @@ module.exports = {
             const sources = component.source;
             Object.keys(sources || {}).forEach((inPort) => {
                 const source = sources[inPort];
-                if (source[agentComponentId] && source[agentComponentId].includes(mcpPort)) {
+                if (source[agentComponentId]?.includes(mcpPort)) {
                     components[componentId] = component;
                     if (component.type.split('.').slice(0, 2).join('.') !== 'appmixer.mcpservers') {
                         error = `Component ${componentId} is not an 'MCP Server' but ${component.type}.
@@ -236,7 +236,7 @@ module.exports = {
 
     callTools: async function(context, modelToolCalls) {
 
-        if (!modelToolCalls || !modelToolCalls.length) {
+        if (!modelToolCalls?.length) {
             return [];
         }
 

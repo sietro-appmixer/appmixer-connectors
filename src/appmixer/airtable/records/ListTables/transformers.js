@@ -505,7 +505,7 @@ function transformSchemaToArray(fieldsArray) {
             };
         } else {
             // Otherwise, default to the provided schema type or "string"
-            const type = (field.schema && field.schema.type) || 'string';
+            const type = field.schema?.type || 'string';
             acc[field.value] = {
                 type,
                 title: field.label

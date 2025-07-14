@@ -20,7 +20,7 @@ module.exports = {
                     'accept': 'application/json'
                 }
             });
-            if (data && data.email) {
+            if (data?.email) {
                 return data;
             } else {
                 throw new Error('Could not retrieve Brevo account info.');
@@ -39,7 +39,7 @@ module.exports = {
                     'accept': 'application/json'
                 }
             });
-            if (!response.data || !response.data.email) {
+            if (!response.data?.email) {
                 throw new Error('Authentication failed: Invalid API key or unexpected response.');
             }
             return true;

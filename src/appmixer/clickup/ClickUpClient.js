@@ -63,7 +63,7 @@ class ClickUpClient {
                 params,
                 paramsSerializer
             });
-            if (response && response[key]) {
+            if (response?.[key]) {
                 const results = response[key];
                 hasMoreRecords = !response['last_page'];
                 records = records.concat(results);
