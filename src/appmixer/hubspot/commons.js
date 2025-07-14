@@ -37,7 +37,7 @@ module.exports = {
 
     WATCHED_PROPERTIES_CONTACT: ['email', 'firstname', 'lastname', 'phone', 'website', 'company', 'address', 'city', 'state', 'zip'],
     WATCHED_PROPERTIES_DEAL: ['dealname', 'dealstage', 'pipeline', 'hubSpotOwnerId', 'closedate', 'amount'],
-    WATCHED_PROPERTIES_COMPANY: ['name', 'domain', 'industry', 'website', 'phone', 'city', 'state', 'country', 'description', 'hubSpotOwnerId'],
+    WATCHED_PROPERTIES_COMPANY: ['name', 'domain', 'industry', 'website', 'phone', 'city', 'state', 'country', 'description', 'hubspot_owner_id'],
 
     async getObjectProperties(context, hubspot, objectType, output = 'all') {
 
