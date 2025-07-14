@@ -18,7 +18,7 @@ module.exports = {
             action: `query?${new URLSearchParams(params).toString()}`
         });
 
-        if (data.records && data.records.length) {
+        if (data.records?.length) {
             return commons.sendArrayOutput({
                 context,
                 outputPortName: 'out',

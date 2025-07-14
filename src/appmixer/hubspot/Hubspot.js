@@ -91,7 +91,7 @@ class Hubspot {
             data.after = after;
             const response = await this.call(method, url, data);
             const { results, paging } = response.data;
-            after = paging && paging.next ? paging.next.after : null;
+            after = paging?.next?.after || null;
             records = records.concat(results);
         } while (after && records.length < recordLimit);
         return records;

@@ -154,7 +154,7 @@ module.exports = {
                 if (tool.inputSchema) {
                     toolDefinition.function.parameters = tool.inputSchema;
                 }
-                if (toolDefinition.function.parameters && toolDefinition.function.parameters.type === 'object' && !toolDefinition.function.parameters.properties) {
+                if (toolDefinition.function.parameters?.type === 'object' && !toolDefinition.function.parameters.properties) {
                     toolDefinition.function.parameters.properties = {};
                 }
                 toolsDefinition.push(toolDefinition);

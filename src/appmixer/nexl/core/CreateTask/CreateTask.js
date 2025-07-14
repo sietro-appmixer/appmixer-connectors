@@ -45,7 +45,7 @@ module.exports = {
             data: { query: mutation, variables }
         });
 
-        if (data.data.createTask.failReasons && data.data.createTask.failReasons.length > 0) {
+        if (data.data.createTask.failReasons?.length > 0) {
             throw new context.CancelError(data.data.createTask.failReasons.join(', '));
         }
 

@@ -22,7 +22,7 @@ module.exports = {
 
     projectsToSelectArray(projects) {
 
-        if (projects && Array.isArray(projects)) {
+        if (Array.isArray(projects)) {
             return projects.map(project => ({
                 label: `${project.name}`,
                 value: project.id

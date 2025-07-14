@@ -33,7 +33,7 @@ module.exports = {
                     'Authorization': `OAuth ${context.accessToken}`
                 }
             }).then(result => {
-                if (result.error && result.error === 'invalid_token') {
+                if (result.error === 'invalid_token') {
                     throw new context.InvalidTokenError(result.error);
                 }
             });

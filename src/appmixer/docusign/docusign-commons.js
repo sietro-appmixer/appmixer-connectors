@@ -55,7 +55,7 @@ const getEnvelope = async (args, accessToken) => {
     return await envelopesApi.getEnvelope(
         args.accountId,
         args.envelopeId,
-        { include: args.include && args.include.join(',') }
+        { include: args.include?.join(',') }
     );
 };
 

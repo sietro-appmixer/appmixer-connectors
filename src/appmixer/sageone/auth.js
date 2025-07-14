@@ -49,7 +49,7 @@ module.exports = {
 
         refreshAccessTokenErrCallback: (err, context) => {
 
-            if (err.error && err.error.error === 'invalid_grant') {
+            if (err.error?.error === 'invalid_grant') {
                 throw new context.InvalidTokenError(err.error.error);
             }
             throw err;
