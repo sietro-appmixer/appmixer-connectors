@@ -48,7 +48,7 @@ const initClient = async (context, auth, connectionId) => {
                             logString = JSON.stringify(log);
                         }
                     } catch (e) {
-                        logString = Object.keyslog?.join(', ');
+                        logString = Object.keys(log || {}).join(', ');
                     }
                     context.log('info', '[KAFKA] ' + [
                         'namespace: ' + namespace,

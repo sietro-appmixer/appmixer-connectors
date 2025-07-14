@@ -147,7 +147,7 @@ module.exports = {
                 const { answers, ...rest } = response;
                 return {
                     ...rest,
-                    answers: Object.values(answers)?.reduce((acc, value) => {
+                    answers: Object.values(answers || {}).reduce((acc, value) => {
                         acc.push(value);
                         return acc;
                     }, [])
