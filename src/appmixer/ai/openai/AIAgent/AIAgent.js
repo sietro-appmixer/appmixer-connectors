@@ -483,9 +483,31 @@ module.exports = {
 
         await this.publishChatProgressEvent(context, 'start', 'Thinking...');
         const receiveStart = new Date;
-        const { prompt, storeId, threadId } = context.messages.in.content;
+        let { prompt, storeId, threadId } = context.messages.in.content;
         const model = context.properties.model;
         const client = lib.sdk(context);
+
+        // Handle "Create New Store" selection
+        if (storeId === 'CREATE_NEW_STORE') {
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            const defaultStoreName = `AI-Agent-Memory-${timestamp}`;
+
+            try {
+                const newStore = await context.callAppmixer({
+                    endPoint: '/stores',
+                    method: 'POST',
+                    body: {
+                        name: defaultStoreName
+                    }
+                });
+                storeId = newStore.storeId;
+                await context.log({ step: 'created-new-store', storeId, storeName: defaultStoreName });
+            } catch (error) {
+                await context.log({ step: 'create-store-error', error: error.message });
+                throw new Error(`Failed to create new data store: ${error.message}`);
+            }
+        }
+
         let tools = await context.stateGet('tools');
         if (!tools) {
             // If agent is started with OnStart component, the start method might not

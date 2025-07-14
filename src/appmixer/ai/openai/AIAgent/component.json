@@ -73,26 +73,16 @@
                 },
                 "storeId": {
                     "label": "Memory Data Store",
-                    "type": "datastore-picker",
+                    "type": "select",
                     "index": 3,
+                    "allowEmpty": true,
                     "source": {
                         "url": "/component/appmixer/utils/storage/ListStores?outPort=out",
                         "data": {
-                            "transform": "./ListStores#toPickerArray"
+                            "transform": "./ListStores#toSelectArray"
                         }
                     },
-                    "createStore": {
-                        "url": "/component/appmixer/utils/storage/CreateStore?outPort=out",
-                        "fields": {
-                            "name": {
-                                "type": "text",
-                                "label": "Store Name",
-                                "required": true,
-                                "placeholder": "Enter store name..."
-                            }
-                        }
-                    },
-                    "tooltip": "Select a data store to be used for storing the conversation context. This is useful if you want to preserve the context across different executions. Additionally, by saving the history to a data store, you can create other flows that export the history to your custom databases or external tools. Explore the Storage utilities to learn more about how to use the data store in your flows."
+                    "tooltip": "Select a data store to be used for storing the conversation context. Choose '+ Create New Store' to create one quickly, or select an existing store. This is useful for preserving context across different executions and for exporting conversation history to custom databases or external tools."
                 }
             }
         }
