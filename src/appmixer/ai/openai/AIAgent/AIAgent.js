@@ -39,7 +39,7 @@ module.exports = {
         Object.keys(flowDescriptor).forEach((componentId) => {
             const component = flowDescriptor[componentId];
             const sources = component.source;
-            Object.keys(sources || {}).forEach((inPort) => {
+            Object.keyssources?.forEach((inPort) => {
                 const source = sources[inPort];
                 if (source[agentComponentId] && source[agentComponentId].includes(toolsPort)) {
                     tools[componentId] = component;
@@ -116,7 +116,7 @@ module.exports = {
         Object.keys(flowDescriptor).forEach((componentId) => {
             const component = flowDescriptor[componentId];
             const sources = component.source;
-            Object.keys(sources || {}).forEach((inPort) => {
+            Object.keyssources?.forEach((inPort) => {
                 const source = sources[inPort];
                 if (source[agentComponentId] && source[agentComponentId].includes(mcpPort)) {
                     components[componentId] = component;

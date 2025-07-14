@@ -72,7 +72,7 @@ module.exports = {
 
         const queryParameters = {};
 
-        if (override && override.query) {
+        if (override?.query) {
             Object.keys(override.query).forEach(parameter => {
                 queryParameters[parameter] = override.query[parameter];
             });
@@ -133,7 +133,7 @@ module.exports = {
 
     setProperties: function(obj, mapping) {
 
-        Object.keys(mapping || {}).forEach(path => {
+        Object.keysmapping?.forEach(path => {
             this.setProperty(obj, path, mapping[path]);
         });
     },

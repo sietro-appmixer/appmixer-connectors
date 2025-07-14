@@ -188,7 +188,7 @@ module.exports = {
 
     setProperties: function(obj, mapping) {
 
-        Object.keys(mapping || {}).forEach(path => {
+        Object.keysmapping?.forEach(path => {
             this.setProperty(obj, path, mapping[path]);
         });
     },
