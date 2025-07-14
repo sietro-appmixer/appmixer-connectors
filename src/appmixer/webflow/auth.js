@@ -23,10 +23,10 @@ module.exports = {
 
             const response = await context.httpRequest({ url, method: 'GET', headers });
 
-            if (response.data && response.data.firstName && response.data.lastName) {
+            if (response.data?.firstName && response.data.lastName) {
                 const fullName = `${response.data.firstName} ${response.data.lastName}`;
                 return { name: fullName };
-            } else if (response.data && response.data.email) {
+            } else if (response.data?.email) {
                 return { name: response.data.email };
             }
         },

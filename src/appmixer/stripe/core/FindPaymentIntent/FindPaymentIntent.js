@@ -60,7 +60,7 @@ module.exports = {
         }
 
         // Adjust for response structure: { data: { data: [...] } }
-        const paymentIntents = response.data && response.data.data ? response.data.data : [];
+        const paymentIntents = response.data?.data || [];
 
         // Check if no results found and send to notFound port
         if (paymentIntents.length === 0) {

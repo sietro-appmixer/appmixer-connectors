@@ -159,14 +159,14 @@ const addConsumer = async (context, queue, options, flowId, componentId, auth, c
             flowId,
             componentId,
             {
-                content: message.content && message.content.toString(),
+                content: message.content?.toString(),
                 fields: message.fields,
                 properties: message.properties
             },
             { enqueueOnly: 'true' }
         );
 
-        if (options && options.noAck !== true) {
+        if (options?.noAck !== true) {
             consumer.ack(message);
         }
 

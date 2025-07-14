@@ -58,7 +58,7 @@ class Hubspot {
         try {
             return await axios(url, payload);
         } catch (e) {
-            if (e.response && e.response.data && e.response.data.message) {
+            if (e.response?.data?.message) {
                 const error = new Error(e.response.data.message);
                 error.status = e.response.status;
                 error.data = e.response.data;

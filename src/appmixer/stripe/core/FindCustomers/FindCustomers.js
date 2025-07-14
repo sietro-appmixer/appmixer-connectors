@@ -76,7 +76,7 @@ module.exports = {
         }
 
         // Adjust for response structure: { data: { data: [...] } }
-        const customers = response.data && response.data.data ? response.data.data : [];
+        const customers = response.data?.data || [];
 
         // Check if no results found and send to notFound port
         if (customers.length === 0) {

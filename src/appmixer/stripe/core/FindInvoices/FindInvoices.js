@@ -69,7 +69,7 @@ module.exports = {
         }
 
         // Adjust for response structure: { data: { data: [...] } }
-        const invoices = response.data && response.data.data ? response.data.data : [];
+        const invoices = response.data?.data || [];
 
         // Check if no results found and send to notFound port
         if (invoices.length === 0) {

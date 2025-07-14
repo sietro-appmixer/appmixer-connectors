@@ -36,7 +36,7 @@ module.exports = {
                     method: 'GET',
                     params: { format: 'full' }
                 }).then(response => response.data).catch(err => {
-                    if (err && err.response && err.response.status === 404) {
+                    if (err?.response?.status === 404) {
                         return null;
                     }
                     throw err;
