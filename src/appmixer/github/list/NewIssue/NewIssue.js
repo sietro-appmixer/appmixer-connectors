@@ -41,7 +41,7 @@ module.exports = {
         res.data.items.forEach(processIssues.bind(null, known, actual, diff));
 
         if (diff.size) {
-            await Promise.all(diff.map(issue => {
+            await Promise.all(Array.from(diff).map(issue => {
                 return context.sendJson(issue, 'issue');
             }));
         }
