@@ -38,7 +38,8 @@ module.exports = {
 
         if (context.messages.timeout) {
             await this.scheduleDrain(context);
-            await this.prepareForSend(context, { threshold });
+            const documents = await this.prepareForSend(context, { threshold });
+            await this.processSend(context, { documents });
         } else {
             const { document, filename, integrationId } = context.messages.in.content;
 
@@ -53,54 +54,90 @@ module.exports = {
             context.log({ step: 'receive', entries: entries.length });
 
             if (!scheduleValue || (threshold && entries.length >= threshold)) {
-                await this.prepareForSend(context, { threshold });
+                const documents = await this.prepareForSend(context, { threshold });
+                await this.processSend(context, { documents });
             }
         }
     },
 
     async prepareForSend(context, { threshold }) {
 
-        const entriesToUpload = await context.stateSet('documents-upload-batch');
+        const entriesToUpload = await context.stateGet('documents-upload-batch');
         if (entriesToUpload) {
-            context.log({
+            await context.log({
                 step: 'in progress',
                 message: `Found ${entriesToUpload.length} documents in documents-upload-batch.`
             });
-            return;
+            return [];
         }
 
-        let lock;
+        if (threshold && (await context.stateGet('documents') || []).length < threshold) {
+            await context.log({
+                step: 'in progress - not enough entries'
+            });
+            return [];
+        }
+
+        let prepareDocumentsLock;
         try {
 
             // https://docs.appmixer.com/6.0/v4.1/component-definition/behaviour#async-context.lock-lockname-options
-            lock = await context.lock(context.componentId, getLockConfiguration(context));
-            const { integrationId, filename } = await context.stateGet('metadata') || {};
-            if (!integrationId || !filename) {
-                throw new context.CancelError('No metadata found in state. Cannot send documents.');
-            }
+            prepareDocumentsLock = await context.lock(context.componentId, getLockConfiguration(context));
 
             const entriesToUpload = await context.stateSet('documents-upload-batch');
             let documents = [];
 
             if (entriesToUpload) {
                 documents = entriesToUpload.map(entry => entry.data);
-                context.log({
+                await context.log({
                     step: 'documents-upload-batch docs',
                     message: `Prepared ${documents.length} documents for upload.`,
-                    lock
+                    lock: prepareDocumentsLock
                 });
 
             } else {
-                const entries = (await context.stateGet('documents') || []);
+                let entries = (await context.stateGet('documents') || []);
 
-                await context.stateSet('documents-upload-batch', entries);
-                await context.stateUnset('documents');
-                context.log({
-                    step: 'prepareForSend', message: `Prepared ${entries.length} documents for upload.`, lock
+                if (threshold && entries.length > threshold) {
+                    await context.stateSet('documents', entries.slice(0, -threshold)); // keep all but the last `threshold` entries
+                    await context.stateSet('documents-upload-batch', entries.slice(-threshold)); // take the last `threshold` entries
+                    entries = entries.slice(-threshold);
+                } else {
+                    await context.stateSet('documents-upload-batch', entries);
+                    await context.stateUnset('documents');
+                }
+                await context.log({
+                    step: 'prepareForSend',
+                    entries: entries.length,
+                    threshold,
+                    message: `Prepared ${entries.length} documents for upload.`,
+                    lock: prepareDocumentsLock.value
                 });
                 documents = entries.map(entry => entry.data);
             }
 
+            return documents;
+        } finally {
+            prepareDocumentsLock?.unlock();
+        }
+    },
+
+    async processSend(context, { documents }) {
+
+        if (!documents || documents.length === 0) {
+            return;
+        }
+
+        let lock;
+
+        try {
+
+            const { integrationId, filename } = await context.stateGet('metadata') || {};
+            if (!integrationId || !filename) {
+                throw new context.CancelError('No metadata found in state. Cannot send documents.');
+            }
+
+            lock = await context.lock('upload_lock_' + context.componentId, getLockConfiguration(context));
             await this.sendDocuments(context, {
                 documents,
                 filename,
@@ -111,6 +148,7 @@ module.exports = {
         } finally {
             lock?.unlock();
         }
+
     },
 
     async scheduleDrain(context) {
@@ -140,8 +178,8 @@ module.exports = {
             message: `Sending ${documents.length} documents for integration ${integrationId} with filename ${filename}.`,
             documents: documents.map(doc => doc.id)
         });
-        await new Promise(r => setTimeout(r, 20000));
-        return context.sendJson({}, 'out');
+        await new Promise(r => setTimeout(r, 30000));
+        return context.sendArray(documents.map(doc => doc.id), 'out');
 
         //
         // const { url, systemActivityId } = await lib.requestUpload(context, { filename });
