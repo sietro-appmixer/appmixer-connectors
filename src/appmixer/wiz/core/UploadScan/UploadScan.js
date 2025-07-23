@@ -89,21 +89,28 @@ module.exports = {
 
     async sendDocuments(context, { documents, filename, integrationId }) {
 
-        const { url, systemActivityId } = await lib.requestUpload(context, { filename });
 
-        const fileContent = {
-            integrationId,
-            dataSources: documents
-        };
 
-        await lib.uploadFile(context, { url, fileContent });
-        const systemActivity = await lib.getStatus(context, systemActivityId);
+        // only for testing purposes
+        await new Promise(r => setTimeout(r, 10000));
+        return context.sendJson({  }, 'out');
 
-        await context.stateUnset('documents');
-        // throw error if the system activity is not valid.
-        lib.validateUploadStatus(context, { systemActivity });
-
-        return context.sendJson(systemActivity, 'out');
+        //
+        // const { url, systemActivityId } = await lib.requestUpload(context, { filename });
+        //
+        // const fileContent = {
+        //     integrationId,
+        //     dataSources: documents
+        // };
+        //
+        // await lib.uploadFile(context, { url, fileContent });
+        // const systemActivity = await lib.getStatus(context, systemActivityId);
+        //
+        // await context.stateUnset('documents');
+        // // throw error if the system activity is not valid.
+        // lib.validateUploadStatus(context, { systemActivity });
+        //
+        // return context.sendJson(systemActivity, 'out');
     }
 };
 
