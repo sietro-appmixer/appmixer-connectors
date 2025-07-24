@@ -66,7 +66,7 @@ module.exports = {
         const entriesToUpload = await context.stateGet('documents-upload-batch');
         if (entriesToUpload) {
             await context.log({
-                step: 'in progress',
+                step: 'upload already in progress',
                 message: `Found ${entriesToUpload.length} documents in documents-upload-batch.`
             });
             return [];
@@ -74,7 +74,7 @@ module.exports = {
 
         if (threshold && (await context.stateGet('documents') || []).length < threshold) {
             await context.log({
-                step: 'in progress - not enough entries'
+                step: 'skip, not enough entries'
             });
             return [];
         }
