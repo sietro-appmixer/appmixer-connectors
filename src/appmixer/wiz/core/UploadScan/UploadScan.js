@@ -86,7 +86,7 @@ module.exports = {
             // https://docs.appmixer.com/6.0/v4.1/component-definition/behaviour#async-context.lock-lockname-options
             prepareDocumentsLock = await context.lock(context.componentId, getLockConfiguration(context));
 
-            const entriesToUpload = await context.stateSet('documents-upload-batch');
+            const entriesToUpload = await context.stateGet('documents-upload-batch');
             let documents = [];
 
             if (entriesToUpload) {
