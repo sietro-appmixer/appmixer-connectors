@@ -37,10 +37,11 @@ module.exports = {
         const { threshold, scheduleValue } = context.properties;
 
         if (context.messages.timeout) {
-            await context.log({ step: 'timeout trigger' });
             await this.scheduleDrain(context);
-            const documents = await this.prepareForSend(context, { threshold });
-            await this.processSend(context, { documents });
+            const entries = await context.stateGet('documents') || [];
+            if (entries.length > 0) {
+                await this.processAllDocuments(context, { threshold });
+            }
         } else {
             const { document, filename, integrationId } = context.messages.in.content;
 
@@ -55,9 +56,17 @@ module.exports = {
             context.log({ step: 'receive', entries: entries.length });
 
             if (!scheduleValue || (threshold && entries.length >= threshold)) {
-                const documents = await this.prepareForSend(context, { threshold });
-                await this.processSend(context, { documents });
+                await this.processAllDocuments(context, { threshold });
             }
+        }
+    },
+
+    async processAllDocuments(context, { threshold } = {}) {
+        const documents = await this.prepareForSend(context, { threshold });
+        await this.processSend(context, { documents });
+        const entries = await context.stateGet('documents') || [];
+        if (threshold && entries.length >= threshold) {
+            await this.processAllDocuments(context, { threshold });
         }
     },
 
@@ -66,16 +75,14 @@ module.exports = {
         const entriesToUpload = await context.stateGet('documents-upload-batch');
         if (entriesToUpload) {
             await context.log({
-                step: 'upload already in progress',
+                step: 'pre-upload: skipping, upload already in progress',
                 message: `Found ${entriesToUpload.length} documents in documents-upload-batch.`
             });
             return [];
         }
 
         if (threshold && (await context.stateGet('documents') || []).length < threshold) {
-            await context.log({
-                step: 'skip, not enough entries'
-            });
+            await context.log({ step: 'pre-upload: skipping, not enough documents' });
             return [];
         }
 
@@ -149,7 +156,6 @@ module.exports = {
         } finally {
             lock?.unlock();
         }
-
     },
 
     async scheduleDrain(context) {
