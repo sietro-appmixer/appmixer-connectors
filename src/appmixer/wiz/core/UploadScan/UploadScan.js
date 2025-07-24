@@ -31,6 +31,17 @@ module.exports = {
         const { threshold, scheduleValue } = context.properties;
 
         if (context.messages.timeout) {
+            const timeoutId = await context.stateGet('timeoutId');
+
+            if (timeoutId && context.messages.timeout.timeoutId !== timeoutId) {
+                // handling the case, when timeout has been set, but system crashed, and the timeoutId
+                // has not been saved into state, then the `original` timeout has been triggered again(
+                // because it did not finish correctly), state was 'JsonSent' and timeout was set
+                // for the second time. At this point, two timeouts can be in the DB, but we have
+                // to process only one, let's process the one with the same timeoutId as in the 'state'
+                return;
+            }
+
             await this.scheduleDrain(context);
             const entries = await context.stateGet('documents') || [];
             if (entries.length > 0) {
@@ -43,7 +54,6 @@ module.exports = {
                 await context.stateSet('metadata', { filename, integrationId });
             }
 
-            // await context.stateAddToSet('documents', { id: generateContentHash(document), data: document });
             await context.stateAddToSet('documents', { id: uuid(), data: document });
             const entries = await context.stateGet('documents') || [];
 
@@ -169,7 +179,8 @@ module.exports = {
             throw new context.CancelError(`Computed timeout is non‑positive (${diff} ms). Check schedule parameters.`);
         }
 
-        await context.setTimeout({}, diff);
+        const newTimeoutId = await context.setTimeout({}, diff);
+        await context.stateSet('timeoutId', newTimeoutId);
     },
 
     async sendDocuments(context, { documents, filename, integrationId }) {
