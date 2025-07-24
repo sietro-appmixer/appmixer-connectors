@@ -3,67 +3,58 @@ const sinon = require('sinon');
 const testUtils = require('../utils.js');
 const uploadScan = require('../../src/appmixer/wiz/core/UploadScan/UploadScan.js');
 
-describe('wiz.UploadScan', () => {
+describe('wiz.uploadScan', () => {
 
     let context;
-    let mockState;
-    let mockStateSet;
 
-    beforeEach(() => {
-        mockState = {};
-        mockStateSet = {};
-
+    beforeEach(async () => {
+        // Reset the context
         context = {
             ...testUtils.createMockContext(),
-            setTimeout: sinon.spy(),
-            stateGet: sinon.stub().callsFake((key) => {
-                if (mockStateSet[key] instanceof Set) {
-                    return Array.from(mockStateSet[key]);
-                }
-                return mockState[key];
-            }),
-            stateSet: sinon.stub().callsFake((key, value) => { mockState[key] = value; }),
-            stateUnset: sinon.stub().callsFake((key) => {
-                delete mockState[key];
-                if (key.startsWith('documents_')) {
-                    delete mockStateSet[key];
-                }
-            }),
-            stateAddToSet: sinon.stub().callsFake((key, value) => {
-                if (!mockStateSet[key]) {
-                    mockStateSet[key] = new Set();
-                }
-                mockStateSet[key].add(value);
-            }),
-            lock: sinon.stub().resolves({ unlock: sinon.stub() }),
-            sendJson: sinon.stub().resolves(),
-            config: {
-                uploadLockRetryDelay: '3000',
-                uploadLockTtl: '900000',
-                uploadLockMaxRetryCount: '60'
-            }
+            setTimeout: sinon.spy()
         };
-    });
-
-    it('should store documents without using lock', async () => {
-        context.properties = { threshold: 5 };
-        context.messages = {
-            in: {
-                content: {
-                    document: { id: 'doc1', type: 'vulnerability', severity: 'high' },
-                    filename: 'test.json',
-                    integrationId: 'integration-123'
-                }
-            }
-                };
-
-
-        uploadScan.receive(context);
-
-        // await context.stateAddToSet('entry', { a: 1 });
-        // await context.stateAddToSet('entry', { a: 3 });
-        // console.log(await context.stateGet('entry'));
 
     });
 
+    it('schedule drain 1 minute from now', async () => {
+        const scheduleValue = 1;
+
+        context.properties = {
+            scheduleType: 'minutes',
+            scheduleValue
+        };
+
+        await uploadScan.scheduleDrain(context, { previousDate: null });
+        const diff = context.setTimeout.getCall(0).args[1];
+        const expectedSeconds = scheduleValue * 60;
+        assert.equal(Math.round(diff / 1000), expectedSeconds, 'Timeout should be set to the schedule value in milliseconds');
+    });
+
+    it('schedule drain 1 minute from now', async () => {
+        const scheduleValue = 1;
+
+        context.properties = {
+            scheduleType: 'hours',
+            scheduleValue
+        };
+
+        await uploadScan.scheduleDrain(context, { previousDate: null });
+        const diff = context.setTimeout.getCall(0).args[1];
+        const expectedSeconds = scheduleValue * 60 * 60;
+        assert.equal(Math.round(diff / 1000), expectedSeconds, 'Timeout should be set to the schedule value in milliseconds');
+    });
+
+    it('schedule drain 1 day from now', async () => {
+        const scheduleValue = 1;
+
+        context.properties = {
+            scheduleType: 'days',
+            scheduleValue
+        };
+
+        await uploadScan.scheduleDrain(context, { previousDate: null });
+        const diff = context.setTimeout.getCall(0).args[1];
+        const expectedSeconds = scheduleValue * 60 * 60 * 24;
+        assert.equal(Math.round(diff / 1000), expectedSeconds, 'Timeout should be set to the schedule value in milliseconds');
+    });
 });
