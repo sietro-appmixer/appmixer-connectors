@@ -37,6 +37,7 @@ module.exports = {
         const { threshold, scheduleValue } = context.properties;
 
         if (context.messages.timeout) {
+            await context.log({ step: 'timeout trigger' });
             await this.scheduleDrain(context);
             const documents = await this.prepareForSend(context, { threshold });
             await this.processSend(context, { documents });
@@ -162,6 +163,7 @@ module.exports = {
         }
 
         const nextDate = referenceDate.add(scheduleValue, scheduleType);
+        await context.log({ step: 'schedule', nextDate: nextDate.toISOString() });
         const diff = nextDate.diff(now);
         if (diff <= 0) {
             throw new context.CancelError(`Computed timeout is non‑positive (${diff} ms). Check schedule parameters.`);
@@ -178,7 +180,7 @@ module.exports = {
             message: `Sending ${documents.length} documents for integration ${integrationId} with filename ${filename}.`,
             documents: documents.map(doc => doc.id)
         });
-        await new Promise(r => setTimeout(r, 30000));
+        await new Promise(r => setTimeout(r, 10000));
         return context.sendArray(documents.map(doc => doc.id), 'out');
 
         //
