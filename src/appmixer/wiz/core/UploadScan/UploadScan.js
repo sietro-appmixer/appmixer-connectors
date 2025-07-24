@@ -1,12 +1,6 @@
 const lib = require('../../lib');
-const crypto = require('crypto');
 const uuid = require('uuid').v4;
 const moment = require('moment');
-
-const generateContentHash = (content) => {
-    const contentString = typeof content === 'string' ? content : JSON.stringify(content);
-    return crypto.createHash('sha256').update(contentString).digest('hex').substring(0, 16);
-};
 
 const getLockConfiguration = (context) => {
 
@@ -180,30 +174,20 @@ module.exports = {
 
     async sendDocuments(context, { documents, filename, integrationId }) {
 
-        // only for testing purposes
-        context.log({
-            step: 'sendDocuments',
-            message: `Sending ${documents.length} documents for integration ${integrationId} with filename ${filename}.`,
-            documents: documents.map(doc => doc.id)
-        });
-        await new Promise(r => setTimeout(r, 10000));
-        return context.sendArray(documents.map(doc => doc.id), 'out');
+        const { url, systemActivityId } = await lib.requestUpload(context, { filename });
 
-        //
-        // const { url, systemActivityId } = await lib.requestUpload(context, { filename });
-        //
-        // const fileContent = {
-        //     integrationId,
-        //     dataSources: documents
-        // };
-        //
-        // await lib.uploadFile(context, { url, fileContent });
-        // const systemActivity = await lib.getStatus(context, systemActivityId);
-        //
-        // // throw error if the system activity is not valid.
-        // lib.validateUploadStatus(context, { systemActivity });
-        //
-        // return context.sendJson(systemActivity, 'out');
+        const fileContent = {
+            integrationId,
+            dataSources: documents
+        };
+
+        await lib.uploadFile(context, { url, fileContent });
+        const systemActivity = await lib.getStatus(context, systemActivityId);
+
+        // throw error if the system activity is not valid.
+        lib.validateUploadStatus(context, { systemActivity });
+
+        return context.sendJson(systemActivity, 'out');
     }
 };
 
