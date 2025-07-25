@@ -111,8 +111,7 @@ module.exports = {
                     step: 'prepareForSend',
                     entries: entries.length,
                     threshold,
-                    message: `Prepared ${entries.length} documents for upload.`,
-                    lock: prepareDocumentsLock.value
+                    message: `Prepared ${entries.length} documents for upload.`
                 });
                 documents = entries.map(entry => entry.data);
             }
