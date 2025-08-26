@@ -1,14 +1,14 @@
 {
-    "name": "appmixer.groq.core.CreateTranscription",
+    "name": "appmixer.ai.groq.CreateTranslation",
     "author": "Appmixer <info@appmixer.com>",
-    "description": "Generates a transcription of audio content to text.",
+    "description": "Translates spoken words in an audio or video file to English.",
     "version": "1.0.0",
     "private": false,
     "auth": {
-        "service": "appmixer:groq"
+        "service": "appmixer:ai.groq"
     },
     "quota": {
-        "manager": "appmixer:groq",
+        "manager": "appmixer:ai.groq",
         "resources": "requests"
     },
     "inPorts": [
@@ -23,25 +23,15 @@
                     "file": {
                         "type": "string"
                     },
-                    "language": {
-                        "type": "string"
-                    },
                     "prompt": {
                         "type": "string"
-                    },
-                    "responseFormat": {
-                        "type": "string",
-                        "enum": [
-                            "json",
-                            "text",
-                            "verbose_json"
-                        ]
                     },
                     "temperature": {
                         "type": "number"
                     }
                 },
                 "required": [
+                    "model",
                     "file"
                 ]
             },
@@ -50,7 +40,7 @@
                     "model": {
                         "type": "select",
                         "label": "Model",
-                        "tooltip": "Choose the transcription model.",
+                        "tooltip": "Choose the model for translation.",
                         "index": 0,
                         "defaultValue": "whisper-large-v3",
                         "options": [
@@ -67,46 +57,20 @@
                     "file": {
                         "type": "filepicker",
                         "label": "Audio File",
-                        "tooltip": "Upload an audio file (mp3, wav, etc.)",
+                        "tooltip": "Upload audio file (mp3, wav, etc.) to translate.",
                         "index": 1
-                    },
-                    "language": {
-                        "type": "text",
-                        "label": "Language",
-                        "tooltip": "Language code (ISO 639-1) to improve accuracy.",
-                        "index": 2
                     },
                     "prompt": {
                         "type": "textarea",
-                        "label": "Prompt",
-                        "tooltip": "Guide the model with prior text or style.",
-                        "index": 3
-                    },
-                    "responseFormat": {
-                        "type": "select",
-                        "label": "Response Format",
-                        "tooltip": "Format of the returned transcription.",
-                        "index": 4,
-                        "options": [
-                            {
-                                "value": "json",
-                                "content": "JSON"
-                            },
-                            {
-                                "value": "text",
-                                "content": "Plain Text"
-                            },
-                            {
-                                "value": "verbose_json",
-                                "content": "Verbose JSON"
-                            }
-                        ]
+                        "label": "Prompt (optional)",
+                        "tooltip": "Optional English text to guide the model.",
+                        "index": 2
                     },
                     "temperature": {
                         "type": "number",
                         "label": "Temperature",
-                        "tooltip": "Controls randomness of output (0 to 1).",
-                        "index": 5
+                        "tooltip": "0 = deterministic, 1 = more random.",
+                        "index": 3
                     }
                 }
             }
@@ -117,7 +81,7 @@
             "name": "out",
             "options": [
                 {
-                    "label": "Transcription",
+                    "label": "Translation",
                     "value": "text",
                     "schema": {
                         "type": "string"
