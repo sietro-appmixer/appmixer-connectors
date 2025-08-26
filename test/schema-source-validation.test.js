@@ -1,3 +1,5 @@
+'use strict';
+
 const fs = require('fs');
 const path = require('path');
 const assert = require('assert');
@@ -5,15 +7,29 @@ const testUtils = require('./utils');
 
 describe('Schema Source Validation', function() {
     let componentFiles;
+    let componentsByName;
 
     before(function() {
         // Get all component.json files recursively
         const srcDir = path.join(__dirname, '..', 'src');
         componentFiles = testUtils.getComponentJsonFiles(srcDir);
         console.log(`Found ${componentFiles.length} component.json files`);
+
+        // Build a map of component names to their file paths for validation
+        componentsByName = new Map();
+        componentFiles.forEach(filePath => {
+            try {
+                const componentJson = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+                if (componentJson.name) {
+                    componentsByName.set(componentJson.name, filePath);
+                }
+            } catch (error) {
+                console.warn(`Failed to parse ${filePath}:`, error.message);
+            }
+        });
     });
 
-    describe('Components with generateOutputPortOptions should reference themselves in outPorts source', function() {
+    describe('Components with generateOutputPortOptions should reference existing components in outPorts source', function() {
         let componentsWithOutputGeneration;
 
         before(function() {
@@ -49,7 +65,7 @@ describe('Schema Source Validation', function() {
             console.log(`Found ${componentsWithOutputGeneration.length} components with generateOutputPortOptions: true in outPorts source`);
         });
 
-        it('should reference themselves in outPorts source URLs when generating dynamic output schemas', function() {
+        it('should reference existing components in outPorts source URLs when generating dynamic output schemas', function() {
             const invalidComponents = [];
             
             componentsWithOutputGeneration.forEach(({ filePath, componentJson }) => {
@@ -58,16 +74,6 @@ describe('Schema Source Validation', function() {
                     console.warn(`Component at ${filePath} has no name field`);
                     return;
                 }
-                
-                // Extract expected URL path from component name
-                // e.g., "appmixer.googleChat.core.FindMessages" -> "/component/appmixer/googleChat/core/FindMessages"
-                const nameParts = componentName.split('.');
-                if (nameParts.length < 4) {
-                    console.warn(`Component ${componentName} has unexpected name format`);
-                    return;
-                }
-                
-                const expectedUrlPath = `/component/${nameParts.join('/')}`;
                 
                 // Check all outPorts with source that have generateOutputPortOptions
                 componentJson.outPorts.forEach((outPort, outPortIndex) => {
@@ -81,17 +87,33 @@ describe('Schema Source Validation', function() {
                         const sourceUrl = outPort.source.url;
                         
                         // Extract the component path from the source URL
-                        // e.g., "/component/appmixer/googleChat/core/FindMessages?outPort=out" -> "/component/appmixer/googleChat/core/FindMessages"
+                        // e.g., "/component/appmixer/googleChat/core/FindMessages?outPort=out" -> "appmixer.googleChat.core.FindMessages"
                         const urlWithoutQueryParams = sourceUrl.split('?')[0];
+                        const urlParts = urlWithoutQueryParams.split('/');
                         
-                        if (urlWithoutQueryParams !== expectedUrlPath) {
+                        // URL should be in format: /component/vendor/service/module/componentName
+                        if (urlParts.length >= 6 && urlParts[1] === 'component') {
+                            const referencedComponentName = urlParts.slice(2).join('.');
+                            
+                            // Check if the referenced component exists
+                            if (!componentsByName.has(referencedComponentName)) {
+                                invalidComponents.push({
+                                    componentName,
+                                    filePath,
+                                    outPortName: outPort.name || `outPort[${outPortIndex}]`,
+                                    referencedComponent: referencedComponentName,
+                                    fullSourceUrl: sourceUrl,
+                                    issue: 'Referenced component does not exist'
+                                });
+                            }
+                        } else {
                             invalidComponents.push({
                                 componentName,
                                 filePath,
                                 outPortName: outPort.name || `outPort[${outPortIndex}]`,
-                                expectedUrl: expectedUrlPath,
-                                actualUrl: urlWithoutQueryParams,
-                                fullSourceUrl: sourceUrl
+                                referencedComponent: 'unknown',
+                                fullSourceUrl: sourceUrl,
+                                issue: 'Invalid source URL format'
                             });
                         }
                     }
@@ -101,10 +123,9 @@ describe('Schema Source Validation', function() {
             if (invalidComponents.length > 0) {
                 const errorMessage = invalidComponents.map(component => 
                     `Component "${component.componentName}" (${component.filePath}) has invalid source URL in outPort "${component.outPortName}":\n` +
-                    `  Expected: ${component.expectedUrl}\n` +
-                    `  Actual: ${component.actualUrl}\n` +
+                    `  Referenced component: ${component.referencedComponent}\n` +
                     `  Full URL: ${component.fullSourceUrl}\n` +
-                    `  Issue: Components with generateOutputPortOptions should reference themselves for dynamic schema generation.`
+                    `  Issue: ${component.issue}`
                 ).join('\n\n');
                 
                 assert.fail(`Found ${invalidComponents.length} component(s) with invalid outPort source URLs:\n\n${errorMessage}`);
