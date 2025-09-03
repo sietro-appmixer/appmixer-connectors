@@ -543,6 +543,15 @@ module.exports = {
 
 ```
 
+# Plugins, Routes and Jobs
+Files: <connector>/jobs.js, <connector>/routes.js, <connector>/plugin.js
+
+## Context
+`context.log` MUST have this signature:
+```js
+context.log(level, message, [data]);
+```
+
 
 # Components
 
@@ -1004,4 +1013,16 @@ For file input components:
         }
     }
 }
+```
+
+## Testing Guidelines
+### Unit Tests
+- Use `mocha` for unit tests
+- Place tests in `test/unit` directory
+- Use `assert` from Node.js for assertions
+
+When working on a single connector, you can run tests with:
+
+```bash
+npm run test-unit -- test/<connector_name>
 ```
