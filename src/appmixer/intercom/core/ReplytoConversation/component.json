@@ -1,0 +1,605 @@
+{
+    "name": "appmixer.intercom.core.ReplytoConversation",
+    "label": "Reply to Conversation",
+    "author": "Appmixer <info@appmixer.com>",
+    "description": "Send a reply to an existing conversation. This can be used by admins or contacts to respond.",
+    "version": "1.0.0",
+    "private": false,
+    "auth": {
+        "service": "appmixer:intercom"
+    },
+    "quota": {
+        "manager": "appmixer:intercom",
+        "resources": "requests"
+    },
+    "inPorts": [
+        {
+            "name": "in",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "title": "Conversation ID"
+                    },
+                    "reply_type": {
+                        "type": "string",
+                        "enum": [
+                            "contact",
+                            "admin"
+                        ],
+                        "title": "Reply Type"
+                    },
+                    "intercom_user_id": {
+                        "type": "string",
+                        "title": "Intercom User ID"
+                    },
+                    "email": {
+                        "type": "string",
+                        "title": "Email"
+                    },
+                    "user_id": {
+                        "type": "string",
+                        "title": "User ID"
+                    },
+                    "admin_id": {
+                        "type": "string",
+                        "title": "Admin ID"
+                    },
+                    "message_type": {
+                        "type": "string",
+                        "enum": [
+                            "comment",
+                            "note",
+                            "quick_reply"
+                        ],
+                        "title": "Message Type"
+                    },
+                    "body": {
+                        "type": "string",
+                        "title": "Body"
+                    }
+                },
+                "required": [
+                    "id",
+                    "reply_type",
+                    "body"
+                ]
+            },
+            "inspector": {
+                "inputs": {
+                    "id": {
+                        "type": "text",
+                        "tooltip": "The unique identifier of the conversation to reply to, or 'last' to reply to the last part",
+                        "label": "Conversation Id",
+                        "index": 0
+                    },
+                    "reply_type": {
+                        "type": "select",
+                        "tooltip": "Choose whether this is a contact reply or admin reply",
+                        "label": "Reply Type",
+                        "index": 1,
+                        "options": [
+                            {
+                                "label": "Contact Reply",
+                                "value": "contact"
+                            },
+                            {
+                                "label": "Admin Reply",
+                                "value": "admin"
+                            }
+                        ]
+                    },
+                    "intercom_user_id": {
+                        "when": {
+                            "eq": {
+                                "reply_type": "contact"
+                            }
+                        },
+                        "type": "text",
+                        "tooltip": "The Intercom identifier for the contact (use this OR email OR user_id)",
+                        "label": "Intercom User ID",
+                        "index": 2
+                    },
+                    "email": {
+                        "when": {
+                            "eq": {
+                                "reply_type": "contact"
+                            }
+                        },
+                        "type": "text",
+                        "tooltip": "The email address of the contact (use this OR intercom_user_id OR user_id)",
+                        "label": "Email",
+                        "index": 3
+                    },
+                    "user_id": {
+                        "when": {
+                            "eq": {
+                                "reply_type": "contact"
+                            }
+                        },
+                        "type": "text",
+                        "tooltip": "The external user ID for the contact (use this OR intercom_user_id OR email)",
+                        "label": "User ID",
+                        "index": 4
+                    },
+                    "admin_id": {
+                        "when": {
+                            "eq": {
+                                "reply_type": "admin"
+                            }
+                        },
+                        "type": "text",
+                        "tooltip": "The ID of the admin authoring the reply (required for admin replies)",
+                        "label": "Admin ID",
+                        "index": 5
+                    },
+                    "message_type": {
+                        "when": {
+                            "eq": {
+                                "reply_type": "admin"
+                            }
+                        },
+                        "type": "select",
+                        "tooltip": "The type of message (required for admin replies)",
+                        "label": "Message Type",
+                        "index": 6,
+                        "options": [
+                            {
+                                "label": "Comment",
+                                "value": "comment"
+                            },
+                            {
+                                "label": "Note",
+                                "value": "note"
+                            },
+                            {
+                                "label": "Quick Reply",
+                                "value": "quick_reply"
+                            }
+                        ]
+                    },
+                    "body": {
+                        "type": "textarea",
+                        "tooltip": "The text body of the reply (required for contact replies and admin comment/note types)",
+                        "label": "Body",
+                        "index": 7
+                    }
+                }
+            }
+        }
+    ],
+    "outPorts": [
+        {
+            "name": "out",
+            "options": [
+                {
+                    "label": "Type",
+                    "value": "type",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Id",
+                    "value": "id",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Created At",
+                    "value": "created_at",
+                    "schema": {
+                        "type": "number"
+                    }
+                },
+                {
+                    "label": "Updated At",
+                    "value": "updated_at",
+                    "schema": {
+                        "type": "number"
+                    }
+                },
+                {
+                    "label": "Waiting Since",
+                    "value": "waiting_since",
+                    "schema": {
+                        "type": "number"
+                    }
+                },
+                {
+                    "label": "Snoozed Until",
+                    "value": "snoozed_until",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Source",
+                    "value": "source",
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "title": "Source.Type"
+                            },
+                            "id": {
+                                "type": "string",
+                                "title": "Source.Id"
+                            },
+                            "delivered_as": {
+                                "type": "string",
+                                "title": "Source.Delivered As"
+                            },
+                            "subject": {
+                                "type": "string",
+                                "title": "Source.Subject"
+                            },
+                            "body": {
+                                "type": "string",
+                                "title": "Source.Body"
+                            },
+                            "author": {
+                                "type": "object",
+                                "properties": {
+                                    "type": {
+                                        "type": "string",
+                                        "title": "Source.Author.Type"
+                                    },
+                                    "id": {
+                                        "type": "string",
+                                        "title": "Source.Author.Id"
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "title": "Source.Author.Name"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "title": "Source.Author.Email"
+                                    }
+                                },
+                                "title": "Source.Author"
+                            },
+                            "attachments": {
+                                "type": "array",
+                                "items": {},
+                                "title": "Source.Attachments"
+                            },
+                            "url": {
+                                "type": "string",
+                                "title": "Source.Url"
+                            },
+                            "redacted": {
+                                "type": "boolean",
+                                "title": "Source.Redacted"
+                            }
+                        }
+                    }
+                },
+                {
+                    "label": "Contacts",
+                    "value": "contacts",
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "title": "Contacts.Type"
+                            },
+                            "contacts": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "type": {
+                                            "type": "string",
+                                            "title": "Contacts.Contacts.Type"
+                                        },
+                                        "id": {
+                                            "type": "string",
+                                            "title": "Contacts.Contacts.Id"
+                                        },
+                                        "external_id": {
+                                            "type": "string",
+                                            "title": "Contacts.Contacts.External Id"
+                                        }
+                                    }
+                                },
+                                "title": "Contacts.Contacts"
+                            }
+                        }
+                    }
+                },
+                {
+                    "label": "First Contact Reply",
+                    "value": "first_contact_reply",
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "created_at": {
+                                "type": "number",
+                                "title": "First Contact Reply.Created At"
+                            },
+                            "type": {
+                                "type": "string",
+                                "title": "First Contact Reply.Type"
+                            },
+                            "url": {
+                                "type": "string",
+                                "title": "First Contact Reply.Url"
+                            }
+                        }
+                    }
+                },
+                {
+                    "label": "Admin Assignee Id",
+                    "value": "admin_assignee_id",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Team Assignee Id",
+                    "value": "team_assignee_id",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Open",
+                    "value": "open",
+                    "schema": {
+                        "type": "boolean"
+                    }
+                },
+                {
+                    "label": "State",
+                    "value": "state",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Read",
+                    "value": "read",
+                    "schema": {
+                        "type": "boolean"
+                    }
+                },
+                {
+                    "label": "Tags",
+                    "value": "tags",
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "title": "Tags.Type"
+                            },
+                            "tags": {
+                                "type": "array",
+                                "items": {},
+                                "title": "Tags.Tags"
+                            }
+                        }
+                    }
+                },
+                {
+                    "label": "Priority",
+                    "value": "priority",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Sla Applied",
+                    "value": "sla_applied",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Statistics",
+                    "value": "statistics",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Conversation Rating",
+                    "value": "conversation_rating",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Teammates",
+                    "value": "teammates",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Title",
+                    "value": "title",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Custom Attributes",
+                    "value": "custom_attributes",
+                    "schema": {
+                        "type": "object",
+                        "properties": {}
+                    }
+                },
+                {
+                    "label": "Topics",
+                    "value": "topics",
+                    "schema": {
+                        "type": "object",
+                        "properties": {}
+                    }
+                },
+                {
+                    "label": "Ticket",
+                    "value": "ticket",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Linked Objects",
+                    "value": "linked_objects",
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "title": "Linked Objects.Type"
+                            },
+                            "data": {
+                                "type": "array",
+                                "items": {},
+                                "title": "Linked Objects.Data"
+                            },
+                            "total_count": {
+                                "type": "number",
+                                "title": "Linked Objects.Total Count"
+                            },
+                            "has_more": {
+                                "type": "boolean",
+                                "title": "Linked Objects.Has More"
+                            }
+                        }
+                    }
+                },
+                {
+                    "label": "Ai Agent",
+                    "value": "ai_agent",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Ai Agent Participated",
+                    "value": "ai_agent_participated",
+                    "schema": {
+                        "type": "boolean"
+                    }
+                },
+                {
+                    "label": "Conversation Parts",
+                    "value": "conversation_parts",
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "title": "Conversation Parts.Type"
+                            },
+                            "conversation_parts": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "type": {
+                                            "type": "string",
+                                            "title": "Conversation Parts.Conversation Parts.Type"
+                                        },
+                                        "id": {
+                                            "type": "string",
+                                            "title": "Conversation Parts.Conversation Parts.Id"
+                                        },
+                                        "part_type": {
+                                            "type": "string",
+                                            "title": "Conversation Parts.Conversation Parts.Part Type"
+                                        },
+                                        "body": {
+                                            "type": "string",
+                                            "title": "Conversation Parts.Conversation Parts.Body"
+                                        },
+                                        "created_at": {
+                                            "type": "number",
+                                            "title": "Conversation Parts.Conversation Parts.Created At"
+                                        },
+                                        "updated_at": {
+                                            "type": "number",
+                                            "title": "Conversation Parts.Conversation Parts.Updated At"
+                                        },
+                                        "notified_at": {
+                                            "type": "number",
+                                            "title": "Conversation Parts.Conversation Parts.Notified At"
+                                        },
+                                        "assigned_to": {
+                                            "type": "string",
+                                            "title": "Conversation Parts.Conversation Parts.Assigned To"
+                                        },
+                                        "author": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string",
+                                                    "title": "Conversation Parts.Conversation Parts.Author.Id"
+                                                },
+                                                "type": {
+                                                    "type": "string",
+                                                    "title": "Conversation Parts.Conversation Parts.Author.Type"
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "title": "Conversation Parts.Conversation Parts.Author.Name"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "title": "Conversation Parts.Conversation Parts.Author.Email"
+                                                }
+                                            },
+                                            "title": "Conversation Parts.Conversation Parts.Author"
+                                        },
+                                        "attachments": {
+                                            "type": "array",
+                                            "items": {},
+                                            "title": "Conversation Parts.Conversation Parts.Attachments"
+                                        },
+                                        "external_id": {
+                                            "type": "string",
+                                            "title": "Conversation Parts.Conversation Parts.External Id"
+                                        },
+                                        "redacted": {
+                                            "type": "boolean",
+                                            "title": "Conversation Parts.Conversation Parts.Redacted"
+                                        },
+                                        "metadata": {
+                                            "type": "object",
+                                            "properties": {},
+                                            "title": "Conversation Parts.Conversation Parts.Metadata"
+                                        },
+                                        "email_message_metadata": {
+                                            "type": "string",
+                                            "title": "Conversation Parts.Conversation Parts.Email Message Metadata"
+                                        },
+                                        "app_package_code": {
+                                            "type": "string",
+                                            "title": "Conversation Parts.Conversation Parts.App Package Code"
+                                        }
+                                    }
+                                },
+                                "title": "Conversation Parts.Conversation Parts"
+                            },
+                            "total_count": {
+                                "type": "number",
+                                "title": "Conversation Parts.Total Count"
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "icon": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUwMCIgaGVpZ2h0PSIyNTAwIiB2aWV3Qm94PSIwIDAgMjU2IDI1NiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJ4TWlkWU1pZCI+PHBhdGggZD0iTTIyMS44NjcgMTQwLjc0OGE4LjUzNCA4LjUzNCAwIDAgMS0xNy4wNjcgMFY2NGE4LjUzNCA4LjUzNCAwIDAgMSAxNy4wNjcgMHY3Ni43NDh6bS0yLjk3OCA1My40MTNjLTEuMzE5IDEuMTI5LTMyLjkzIDI3LjY1NS05MC44ODkgMjcuNjU1LTU3Ljk1OCAwLTg5LjU2OC0yNi41MjctOTAuODg3LTI3LjY1NmE4LjUzNSA4LjUzNSAwIDAgMS0uOTI1LTEyLjAzMyA4LjUzIDguNTMgMCAwIDEgMTIuMDEzLS45NDJjLjUwMS40MiAyOC43MjkgMjMuNTYzIDc5LjggMjMuNTYzIDUxLjcxMiAwIDc5LjUwMy0yMy4zMSA3OS43NzgtMjMuNTQ1IDMuNTcxLTMuMDY3IDguOTY4LTIuNjU1IDEyLjAzMy45MjVhOC41MzQgOC41MzQgMCAwIDEtLjkyMyAxMi4wMzN6TTM0LjEzMyA2NEE4LjUzNCA4LjUzNCAwIDAgMSA1MS4yIDY0djc2Ljc0OGE4LjUzNCA4LjUzNCAwIDAgMS0xNy4wNjcgMFY2NHptNDIuNjY4LTE3LjA2N2E4LjUzNCA4LjUzNCAwIDAgMSAxNy4wNjYgMHYxMTQuMDAxYTguNTM0IDguNTM0IDAgMCAxLTE3LjA2NiAwdi0xMTR6bTQyLjY2Ni00LjMxOEE4LjUzMiA4LjUzMiAwIDAgMSAxMjggMzQuMDgyYTguNTMyIDguNTMyIDAgMCAxIDguNTM0IDguNTMzdjEyMy43MzNhOC41MzQgOC41MzQgMCAwIDEtMTcuMDY3IDBWNDIuNjE1em00Mi42NjcgNC4zMThhOC41MzQgOC41MzQgMCAwIDEgMTcuMDY2IDB2MTE0LjAwMWE4LjUzNCA4LjUzNCAwIDAgMS0xNy4wNjYgMHYtMTE0ek0yMjQgMEgzMkMxNC4zMjcgMCAwIDE0LjMyNyAwIDMydjE5MmMwIDE3LjY3MiAxNC4zMjcgMzIgMzIgMzJoMTkyYzE3LjY3MyAwIDMyLTE0LjMyOCAzMi0zMlYzMmMwLTE3LjY3My0xNC4zMjctMzItMzItMzJ6IiBmaWxsPSIjMUY4REVEIi8+PC9zdmc+"
+}

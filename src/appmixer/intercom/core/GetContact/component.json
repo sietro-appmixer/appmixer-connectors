@@ -1,0 +1,569 @@
+{
+    "name": "appmixer.intercom.core.GetContact",
+    "author": "Appmixer <info@appmixer.com>",
+    "description": "Get detailed information about a specific contact using its unique identifier.",
+    "version": "1.0.0",
+    "private": false,
+    "auth": {
+        "service": "appmixer:intercom"
+    },
+    "quota": {
+        "manager": "appmixer:intercom",
+        "resources": "requests"
+    },
+    "inPorts": [
+        {
+            "name": "in",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    }
+                }
+            },
+            "inspector": {
+                "inputs": {
+                    "id": {
+                        "type": "text",
+                        "tooltip": "The unique identifier of the contact",
+                        "label": "Contact Id",
+                        "index": 0
+                    }
+                }
+            }
+        }
+    ],
+    "outPorts": [
+        {
+            "name": "out",
+            "options": [
+                {
+                    "label": "Type",
+                    "value": "type",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Contact Id",
+                    "value": "id",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Workspace Id",
+                    "value": "workspace_id",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "External Id",
+                    "value": "external_id",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Role",
+                    "value": "role",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Email",
+                    "value": "email",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Phone",
+                    "value": "phone",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Name",
+                    "value": "name",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Avatar",
+                    "value": "avatar",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Owner Id",
+                    "value": "owner_id",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Social Profiles",
+                    "value": "social_profiles",
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "title": "Social Profiles.Type"
+                            },
+                            "data": {
+                                "type": "array",
+                                "items": {},
+                                "title": "Social Profiles.Data"
+                            }
+                        }
+                    }
+                },
+                {
+                    "label": "Has Hard Bounced",
+                    "value": "has_hard_bounced",
+                    "schema": {
+                        "type": "boolean"
+                    }
+                },
+                {
+                    "label": "Marked Email As Spam",
+                    "value": "marked_email_as_spam",
+                    "schema": {
+                        "type": "boolean"
+                    }
+                },
+                {
+                    "label": "Unsubscribed From Emails",
+                    "value": "unsubscribed_from_emails",
+                    "schema": {
+                        "type": "boolean"
+                    }
+                },
+                {
+                    "label": "Created At",
+                    "value": "created_at",
+                    "schema": {
+                        "type": "number"
+                    }
+                },
+                {
+                    "label": "Updated At",
+                    "value": "updated_at",
+                    "schema": {
+                        "type": "number"
+                    }
+                },
+                {
+                    "label": "Signed Up At",
+                    "value": "signed_up_at",
+                    "schema": {
+                        "type": "number"
+                    }
+                },
+                {
+                    "label": "Last Seen At",
+                    "value": "last_seen_at",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Last Replied At",
+                    "value": "last_replied_at",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Last Contacted At",
+                    "value": "last_contacted_at",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Last Email Opened At",
+                    "value": "last_email_opened_at",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Last Email Clicked At",
+                    "value": "last_email_clicked_at",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Language Override",
+                    "value": "language_override",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Browser",
+                    "value": "browser",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Browser Version",
+                    "value": "browser_version",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Browser Language",
+                    "value": "browser_language",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Os",
+                    "value": "os",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Location",
+                    "value": "location",
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "title": "Location.Type"
+                            },
+                            "country": {
+                                "type": "string",
+                                "title": "Location.Country"
+                            },
+                            "region": {
+                                "type": "string",
+                                "title": "Location.Region"
+                            },
+                            "city": {
+                                "type": "string",
+                                "title": "Location.City"
+                            },
+                            "country_code": {
+                                "type": "string",
+                                "title": "Location.Country Code"
+                            },
+                            "continent_code": {
+                                "type": "string",
+                                "title": "Location.Continent Code"
+                            }
+                        }
+                    }
+                },
+                {
+                    "label": "Android App Name",
+                    "value": "android_app_name",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Android App Version",
+                    "value": "android_app_version",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Android Device",
+                    "value": "android_device",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Android Os Version",
+                    "value": "android_os_version",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Android Sdk Version",
+                    "value": "android_sdk_version",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Android Last Seen At",
+                    "value": "android_last_seen_at",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Ios App Name",
+                    "value": "ios_app_name",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Ios App Version",
+                    "value": "ios_app_version",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Ios Device",
+                    "value": "ios_device",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Ios Os Version",
+                    "value": "ios_os_version",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Ios Sdk Version",
+                    "value": "ios_sdk_version",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Ios Last Seen At",
+                    "value": "ios_last_seen_at",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Custom Attributes",
+                    "value": "custom_attributes",
+                    "schema": {
+                        "type": "object",
+                        "properties": {}
+                    }
+                },
+                {
+                    "label": "Tags",
+                    "value": "tags",
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "title": "Tags.Type"
+                            },
+                            "data": {
+                                "type": "array",
+                                "items": {},
+                                "title": "Tags.Data"
+                            },
+                            "url": {
+                                "type": "string",
+                                "title": "Tags.Url"
+                            },
+                            "total_count": {
+                                "type": "number",
+                                "title": "Tags.Total Count"
+                            },
+                            "has_more": {
+                                "type": "boolean",
+                                "title": "Tags.Has More"
+                            }
+                        }
+                    }
+                },
+                {
+                    "label": "Notes",
+                    "value": "notes",
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "title": "Notes.Type"
+                            },
+                            "data": {
+                                "type": "array",
+                                "items": {},
+                                "title": "Notes.Data"
+                            },
+                            "url": {
+                                "type": "string",
+                                "title": "Notes.Url"
+                            },
+                            "total_count": {
+                                "type": "number",
+                                "title": "Notes.Total Count"
+                            },
+                            "has_more": {
+                                "type": "boolean",
+                                "title": "Notes.Has More"
+                            }
+                        }
+                    }
+                },
+                {
+                    "label": "Companies",
+                    "value": "companies",
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "title": "Companies.Type"
+                            },
+                            "data": {
+                                "type": "array",
+                                "items": {},
+                                "title": "Companies.Data"
+                            },
+                            "url": {
+                                "type": "string",
+                                "title": "Companies.Url"
+                            },
+                            "total_count": {
+                                "type": "number",
+                                "title": "Companies.Total Count"
+                            },
+                            "has_more": {
+                                "type": "boolean",
+                                "title": "Companies.Has More"
+                            }
+                        }
+                    }
+                },
+                {
+                    "label": "Opted Out Subscription Types",
+                    "value": "opted_out_subscription_types",
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "title": "Opted Out Subscription Types.Type"
+                            },
+                            "data": {
+                                "type": "array",
+                                "items": {},
+                                "title": "Opted Out Subscription Types.Data"
+                            },
+                            "url": {
+                                "type": "string",
+                                "title": "Opted Out Subscription Types.Url"
+                            },
+                            "total_count": {
+                                "type": "number",
+                                "title": "Opted Out Subscription Types.Total Count"
+                            },
+                            "has_more": {
+                                "type": "boolean",
+                                "title": "Opted Out Subscription Types.Has More"
+                            }
+                        }
+                    }
+                },
+                {
+                    "label": "Opted In Subscription Types",
+                    "value": "opted_in_subscription_types",
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "title": "Opted In Subscription Types.Type"
+                            },
+                            "data": {
+                                "type": "array",
+                                "items": {},
+                                "title": "Opted In Subscription Types.Data"
+                            },
+                            "url": {
+                                "type": "string",
+                                "title": "Opted In Subscription Types.Url"
+                            },
+                            "total_count": {
+                                "type": "number",
+                                "title": "Opted In Subscription Types.Total Count"
+                            },
+                            "has_more": {
+                                "type": "boolean",
+                                "title": "Opted In Subscription Types.Has More"
+                            }
+                        }
+                    }
+                },
+                {
+                    "label": "Utm Campaign",
+                    "value": "utm_campaign",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Utm Content",
+                    "value": "utm_content",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Utm Medium",
+                    "value": "utm_medium",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Utm Source",
+                    "value": "utm_source",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Utm Term",
+                    "value": "utm_term",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Referrer",
+                    "value": "referrer",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Enabled Push Messaging",
+                    "value": "enabled_push_messaging",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ]
+        }
+    ],
+    "icon": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUwMCIgaGVpZ2h0PSIyNTAwIiB2aWV3Qm94PSIwIDAgMjU2IDI1NiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJ4TWlkWU1pZCI+PHBhdGggZD0iTTIyMS44NjcgMTQwLjc0OGE4LjUzNCA4LjUzNCAwIDAgMS0xNy4wNjcgMFY2NGE4LjUzNCA4LjUzNCAwIDAgMSAxNy4wNjcgMHY3Ni43NDh6bS0yLjk3OCA1My40MTNjLTEuMzE5IDEuMTI5LTMyLjkzIDI3LjY1NS05MC44ODkgMjcuNjU1LTU3Ljk1OCAwLTg5LjU2OC0yNi41MjctOTAuODg3LTI3LjY1NmE4LjUzNSA4LjUzNSAwIDAgMS0uOTI1LTEyLjAzMyA4LjUzIDguNTMgMCAwIDEgMTIuMDEzLS45NDJjLjUwMS40MiAyOC43MjkgMjMuNTYzIDc5LjggMjMuNTYzIDUxLjcxMiAwIDc5LjUwMy0yMy4zMSA3OS43NzgtMjMuNTQ1IDMuNTcxLTMuMDY3IDguOTY4LTIuNjU1IDEyLjAzMy45MjVhOC41MzQgOC41MzQgMCAwIDEtLjkyMyAxMi4wMzN6TTM0LjEzMyA2NEE4LjUzNCA4LjUzNCAwIDAgMSA1MS4yIDY0djc2Ljc0OGE4LjUzNCA4LjUzNCAwIDAgMS0xNy4wNjcgMFY2NHptNDIuNjY4LTE3LjA2N2E4LjUzNCA4LjUzNCAwIDAgMSAxNy4wNjYgMHYxMTQuMDAxYTguNTM0IDguNTM0IDAgMCAxLTE3LjA2NiAwdi0xMTR6bTQyLjY2Ni00LjMxOEE4LjUzMiA4LjUzMiAwIDAgMSAxMjggMzQuMDgyYTguNTMyIDguNTMyIDAgMCAxIDguNTM0IDguNTMzdjEyMy43MzNhOC41MzQgOC41MzQgMCAwIDEtMTcuMDY3IDBWNDIuNjE1em00Mi42NjcgNC4zMThhOC41MzQgOC41MzQgMCAwIDEgMTcuMDY2IDB2MTE0LjAwMWE4LjUzNCA4LjUzNCAwIDAgMS0xNy4wNjYgMHYtMTE0ek0yMjQgMEgzMkMxNC4zMjcgMCAwIDE0LjMyNyAwIDMydjE5MmMwIDE3LjY3MiAxNC4zMjcgMzIgMzIgMzJoMTkyYzE3LjY3MyAwIDMyLTE0LjMyOCAzMi0zMlYzMmMwLTE3LjY3My0xNC4zMjctMzItMzItMzJ6IiBmaWxsPSIjMUY4REVEIi8+PC9zdmc+"
+}

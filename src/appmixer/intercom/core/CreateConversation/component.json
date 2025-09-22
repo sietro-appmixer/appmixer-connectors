@@ -1,0 +1,151 @@
+{
+    "name": "appmixer.intercom.core.CreateConversation",
+    "author": "Appmixer <info@appmixer.com>",
+    "description": "Initiate a new conversation.",
+    "version": "1.0.0",
+    "private": false,
+    "auth": {
+        "service": "appmixer:intercom"
+    },
+    "quota": {
+        "manager": "appmixer:intercom",
+        "resources": "requests"
+    },
+    "inPorts": [
+        {
+            "name": "in",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "from_type": {
+                        "type": "string"
+                    },
+                    "from_id": {
+                        "type": "string"
+                    },
+                    "body": {
+                        "type": "string"
+                    },
+                    "message_type": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "from_type",
+                    "from_id",
+                    "body"
+                ]
+            },
+            "inspector": {
+                "inputs": {
+                    "from_type": {
+                        "type": "select",
+                        "tooltip": "The role associated to the contact",
+                        "label": "From Type",
+                        "index": 0,
+                        "options": [
+                            {
+                                "label": "User",
+                                "value": "user"
+                            },
+                            {
+                                "label": "Lead",
+                                "value": "lead"
+                            }
+                        ]
+                    },
+                    "from_id": {
+                        "type": "text",
+                        "tooltip": "The identifier for the contact which is given by Intercom (24 characters)",
+                        "label": "From ID",
+                        "index": 1
+                    },
+                    "body": {
+                        "type": "textarea",
+                        "tooltip": "The content of the message. HTML is not supported.",
+                        "label": "Body",
+                        "index": 2
+                    },
+                    "message_type": {
+                        "type": "select",
+                        "tooltip": "The kind of message being created",
+                        "label": "Message Type",
+                        "index": 4,
+                        "options": [
+                            {
+                                "label": "In-app",
+                                "value": "inapp"
+                            },
+                            {
+                                "label": "Email",
+                                "value": "email"
+                            },
+                            {
+                                "label": "SMS",
+                                "value": "sms"
+                            },
+                            {
+                                "label": "WhatsApp",
+                                "value": "whatsapp"
+                            },
+                            {
+                                "label": "Facebook",
+                                "value": "facebook"
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    ],
+    "outPorts": [
+        {
+            "name": "out",
+            "options": [
+                {
+                    "label": "Type",
+                    "value": "type",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Message Id",
+                    "value": "id",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Created At",
+                    "value": "created_at",
+                    "schema": {
+                        "type": "number"
+                    }
+                },
+                {
+                    "label": "Body",
+                    "value": "body",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Message Type",
+                    "value": "message_type",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Conversation Id",
+                    "value": "conversation_id",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ]
+        }
+    ],
+    "icon": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUwMCIgaGVpZ2h0PSIyNTAwIiB2aWV3Qm94PSIwIDAgMjU2IDI1NiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJ4TWlkWU1pZCI+PHBhdGggZD0iTTIyMS44NjcgMTQwLjc0OGE4LjUzNCA4LjUzNCAwIDAgMS0xNy4wNjcgMFY2NGE4LjUzNCA4LjUzNCAwIDAgMSAxNy4wNjcgMHY3Ni43NDh6bS0yLjk3OCA1My40MTNjLTEuMzE5IDEuMTI5LTMyLjkzIDI3LjY1NS05MC44ODkgMjcuNjU1LTU3Ljk1OCAwLTg5LjU2OC0yNi41MjctOTAuODg3LTI3LjY1NmE4LjUzNSA4LjUzNSAwIDAgMS0uOTI1LTEyLjAzMyA4LjUzIDguNTMgMCAwIDEgMTIuMDEzLS45NDJjLjUwMS40MiAyOC43MjkgMjMuNTYzIDc5LjggMjMuNTYzIDUxLjcxMiAwIDc5LjUwMy0yMy4zMSA3OS43NzgtMjMuNTQ1IDMuNTcxLTMuMDY3IDguOTY4LTIuNjU1IDEyLjAzMy45MjVhOC41MzQgOC41MzQgMCAwIDEtLjkyMyAxMi4wMzN6TTM0LjEzMyA2NEE4LjUzNCA4LjUzNCAwIDAgMSA1MS4yIDY0djc2Ljc0OGE4LjUzNCA4LjUzNCAwIDAgMS0xNy4wNjcgMFY2NHptNDIuNjY4LTE3LjA2N2E4LjUzNCA4LjUzNCAwIDAgMSAxNy4wNjYgMHYxMTQuMDAxYTguNTM0IDguNTM0IDAgMCAxLTE3LjA2NiAwdi0xMTR6bTQyLjY2Ni00LjMxOEE4LjUzMiA4LjUzMiAwIDAgMSAxMjggMzQuMDgyYTguNTMyIDguNTMyIDAgMCAxIDguNTM0IDguNTMzdjEyMy43MzNhOC41MzQgOC41MzQgMCAwIDEtMTcuMDY3IDBWNDIuNjE1em00Mi42NjcgNC4zMThhOC41MzQgOC41MzQgMCAwIDEgMTcuMDY2IDB2MTE0LjAwMWE4LjUzNCA4LjUzNCAwIDAgMS0xNy4wNjYgMHYtMTE0ek0yMjQgMEgzMkMxNC4zMjcgMCAwIDE0LjMyNyAwIDMydjE5MmMwIDE3LjY3MiAxNC4zMjcgMzIgMzIgMzJoMTkyYzE3LjY3MyAwIDMyLTE0LjMyOCAzMi0zMlYzMmMwLTE3LjY3My0xNC4zMjctMzItMzItMzJ6IiBmaWxsPSIjMUY4REVEIi8+PC9zdmc+"
+}
