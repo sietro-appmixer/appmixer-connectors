@@ -1,10 +1,11 @@
 {
-    "name": "appmixer.line.core.GetNumberOfMessageDeliveries",
+    "name": "appmixer.line.core.NewMessages",
     "author": "Appmixer <info@appmixer.com>",
-    "description": "Returns the number of messages sent from LINE Official Account on a specified day.",
-    "version": "1.0.0",
+    "label": "Watch New Messages",
+    "description": "Watches for new messages.",
     "private": false,
-    "label": "Get Number of Message Deliveries",
+    "webhook": true,
+    "version": "1.0.0",
     "auth": {
         "service": "appmixer:line"
     },
@@ -12,59 +13,107 @@
         "manager": "appmixer:line",
         "resources": "requests"
     },
-    "inPorts": [
-        {
-            "name": "in",
-            "schema": {
-                "type": "object",
-                "properties": {
-                    "date": {
-                        "type": "string"
-                    }
-                },
-                "required": [
-                    "date"
-                ]
-            },
-            "inspector": {
-                "inputs": {
-                    "date": {
-                        "type": "date-time",
-                        "label": "Date",
-                        "index": 0,
-                        "config": {
-                            "enableTime": false,
-                            "format": "YYYYMMDD"
-                        },
-                        "tooltip": "Date for which to retrieve number of sent messages. Format: YYYYMMDD"
-                    }
-                }
-            }
-        }
-    ],
+    "properties": {},
     "outPorts": [
         {
             "name": "out",
             "options": [
                 {
-                    "label": "Status",
-                    "value": "status",
+                    "label": "Event Type",
+                    "value": "type",
                     "schema": {
                         "type": "string"
                     }
                 },
                 {
-                    "label": "Broadcast",
-                    "value": "broadcast",
+                    "label": "Message",
+                    "value": "message",
                     "schema": {
-                        "type": "integer"
+                        "type": "object",
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "title": "Message.Type"
+                            },
+                            "id": {
+                                "type": "string",
+                                "title": "Message.ID"
+                            },
+                            "quoteToken": {
+                                "type": "string",
+                                "title": "Message.Quote Token"
+                            },
+                            "text": {
+                                "type": "string",
+                                "title": "Message.Text"
+                            }
+                        }
                     }
                 },
                 {
-                    "label": "Targeting",
-                    "value": "targeting",
+                    "label": "Webhook Event ID",
+                    "value": "webhookEventId",
                     "schema": {
-                        "type": "integer"
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Delivery Context",
+                    "value": "deliveryContext",
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "isRedelivery": {
+                                "type": "boolean",
+                                "title": "Delivery Context.Is Redelivery"
+                            }
+                        }
+                    }
+                },
+                {
+                    "label": "Timestamp",
+                    "value": "timestamp",
+                    "schema": {
+                        "type": "number"
+                    }
+                },
+                {
+                    "label": "Source",
+                    "value": "source",
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "title": "Source.Type"
+                            },
+                            "groupId": {
+                                "type": "string",
+                                "title": "Source.Group ID"
+                            },
+                            "userId": {
+                                "type": "string",
+                                "title": "Source.User ID"
+                            },
+                            "roomId": {
+                                "type": "string",
+                                "title": "Source.Room ID"
+                            }
+                        }
+                    }
+                },
+                {
+                    "label": "Reply Token",
+                    "value": "replyToken",
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "label": "Mode",
+                    "value": "mode",
+                    "schema": {
+                        "type": "string"
                     }
                 }
             ]
