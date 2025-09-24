@@ -93,44 +93,59 @@ module.exports = {
 
     async receive(context) {
 
-        const { name, company_id, tag_id, segment_id, outputType } = context.messages.in.content;
+        const { tag_id, segment_id, outputType } = context.messages.in.content;
 
         if (context.properties.generateOutputPortOptions) {
             return lib.getOutputPortOptions(context, outputType, schema, { label: 'Companies' });
         }
 
-        const url = 'https://api.intercom.io/companies';
-        const params = {};
+        let url = 'https://api.intercom.io/companies';
+        const queryParams = [];
 
-        // Add query parameters if provided
-        if (name) {
-            params.name = name;
+        // Validate filter parameters - Intercom v2.14 API only accepts one filter at a time
+        if (tag_id && segment_id) {
+            // Both filters provided - log warning and use tag_id precedence
+            await context.log({
+                message: 'Both tag_id and segment_id provided. Using tag_id filter only as Intercom API v2.14 accepts only one filter parameter.'
+            });
         }
 
-        if (company_id) {
-            params.company_id = company_id;
-        }
-
+        // Add query parameters with precedence: tag_id > segment_id
+        // Only one filter parameter is allowed by Intercom v2.14 API
         if (tag_id) {
-            params.tag_id = tag_id;
+            queryParams.push(`tag_id=${encodeURIComponent(tag_id)}`);
+        } else if (segment_id) {
+            queryParams.push(`segment_id=${encodeURIComponent(segment_id)}`);
         }
 
-        if (segment_id) {
-            params.segment_id = segment_id;
+        // Append query string if there are parameters
+        if (queryParams.length > 0) {
+            url += '?' + queryParams.join('&');
         }
 
         // https://developers.intercom.com/reference#list-all-companies
-        const { data } = await context.httpRequest({
+        const options = {
             method: 'GET',
             url: url,
             headers: {
                 'Authorization': `Bearer ${context.auth.accessToken}`,
                 'Intercom-Version': '2.14'
-            },
-            params
-        });
+            }
+        };
+
+        const { data } = await context.httpRequest(options);
+
+        // Check if the response is an error
+        if (data.type === 'error.list') {
+            // Handle specific error case
+            const errorCode = data.errors?.[0]?.code;
+            if (errorCode === 'company_not_found') {
+                return context.sendJson({}, 'notFound');
+            }
+        }
 
         const records = data.data || [];
+
         return lib.sendArrayOutput({ context, records, outputType });
     }
 };
