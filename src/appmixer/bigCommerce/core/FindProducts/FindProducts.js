@@ -99,8 +99,11 @@ module.exports = {
             params.brand_id = parseInt(brand_id, 10);
         }
         if (categories) {
-            // Support both single category and comma-separated list
-            params['categories:in'] = Array.isArray(categories) ? categories.join(',') : categories;
+            // Normalize multiselect input and create comma-separated string for BigCommerce API
+            const normalizedCategories = lib.normalizeMultiselectInput(categories, context, 'Categories');
+            if (normalizedCategories.length > 0) {
+                params['categories:in'] = normalizedCategories.join(',');
+            }
         }
         if (typeof is_visible === 'boolean') {
             params.is_visible = is_visible;
@@ -118,10 +121,12 @@ module.exports = {
             params.type = type;
         }
         if (date_modified_start) {
-            params['date_modified:min'] = date_modified_start;
+            // BigCommerce API expects ISO 8601 format without milliseconds
+            params['date_modified:min'] = new Date(date_modified_start).toISOString().split('.')[0] + 'Z';
         }
         if (date_modified_end) {
-            params['date_modified:max'] = date_modified_end;
+            // BigCommerce API expects ISO 8601 format without milliseconds
+            params['date_modified:max'] = new Date(date_modified_end).toISOString().split('.')[0] + 'Z';
         }
 
         // https://developer.bigcommerce.com/api-reference/store-management/catalog/products/getproducts

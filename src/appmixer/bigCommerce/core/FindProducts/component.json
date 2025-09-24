@@ -27,10 +27,10 @@
                         "type": "string"
                     },
                     "brand_id": {
-                        "type": "number"
+                        "type": "string"
                     },
                     "categories": {
-                        "type": "string"
+                        "type": ["array", "string"]
                     },
                     "is_visible": {
                         "type": "boolean"
@@ -79,16 +79,28 @@
                         "index": 2
                     },
                     "brand_id": {
-                        "type": "number",
-                        "tooltip": "Filter products by brand ID. Use the brand's numeric identifier.",
+                        "type": "text",
+                        "tooltip": "Select the brand from the list or enter the brand ID.",
                         "label": "Brand ID",
+                        "source": {
+                            "url": "/component/appmixer/bigCommerce/core/ListBrands?outPort=out",
+                             "data": {
+                                "transform": "./ListBrands#brandToSelectArray"
+                            }
+                        },
                         "index": 3
                     },
                     "categories": {
-                        "type": "text",
-                        "tooltip": "Filter products by category IDs. Use comma-separated list for multiple categories (e.g., '18,23').",
+                        "type": "multiselect",
+                        "tooltip": "Filter products by category IDs.",
                         "label": "Category IDs",
-                        "index": 4
+                        "index": 4,
+                        "source": {
+                            "url": "/component/appmixer/bigCommerce/core/ListProductCategories?outPort=out",
+                            "data": {
+                                "transform": "./ListProductCategories#categoryToSelectArray"
+                            }
+                        }
                     },
                     "is_visible": {
                         "type": "toggle",
