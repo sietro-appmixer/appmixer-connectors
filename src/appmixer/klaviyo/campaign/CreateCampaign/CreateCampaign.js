@@ -86,7 +86,7 @@ module.exports = {
             });
         }
 
-        const audiencesExcludedArr = audiencesExcluded.ADD;
+        const audiencesExcludedArr = audiencesExcluded?.ADD;
 
         // Add excluded audiences if provided
         if (audiencesExcludedArr && Array.isArray(audiencesExcludedArr) && audiencesExcludedArr.length > 0) {
@@ -106,8 +106,6 @@ module.exports = {
                         }
                         audiencesExcludedIds.push(audience.listId);
                     };
-                } else {
-                    return;
                 }
             });
 
@@ -130,7 +128,11 @@ module.exports = {
 
             if (staticSendPastRecipientsImmediately !== undefined) {
                 sendStrategy.options = sendStrategy.options || {};
-                sendStrategy.options.send_past_recipients_immediately = staticSendPastRecipientsImmediately;
+                // Otherwise throws an error:
+                // 'send_past_recipients_immediately' is not a valid field for the resource 'NonLocalStaticSend'
+                if (sendStrategy.options.is_local) {
+                    sendStrategy.options.send_past_recipients_immediately = staticSendPastRecipientsImmediately;
+                }
             }
         } else if (sendStrategyMethod === 'throttled') {
             sendStrategy.datetime = throttledDatetime;
