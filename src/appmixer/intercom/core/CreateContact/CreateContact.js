@@ -6,7 +6,7 @@ module.exports = {
 
     async receive(context) {
 
-        const { email, name, external_id, role } = context.messages.in.content;
+        const { phone, email, name, external_id, role } = context.messages.in.content;
 
         if (!email && !external_id) {
             throw new context.CancelError('Either email or external_id is required!');
@@ -26,12 +26,16 @@ module.exports = {
             requestBody.external_id = external_id;
         }
 
+        if (phone) {
+            requestBody.phone = phone;
+        }
+
         if (role) {
             requestBody.role = role;
         }
 
 
-        // https://developers.intercom.com/reference#create-a-contact
+        // https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/createcontact
         const { data } = await context.httpRequest({
             method: 'POST',
             url: 'https://api.intercom.io/contacts',

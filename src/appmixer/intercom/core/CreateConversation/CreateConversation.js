@@ -5,7 +5,7 @@ module.exports = {
 
     async receive(context) {
 
-        const { from_type, from_id, body, message_type } = context.messages.in.content;
+        const { from_type, from_id, body, subject, message_type } = context.messages.in.content;
 
         if (!from_type) {
             throw new context.CancelError('From Type is required!');
@@ -17,6 +17,10 @@ module.exports = {
 
         if (!body) {
             throw new context.CancelError('Message body is required!');
+        }
+
+        if (message_type === 'email' && !subject) {
+            throw new context.CancelError('Subject is required when message type is email!');
         }
 
         const requestBody = {
@@ -31,7 +35,11 @@ module.exports = {
             requestBody.message_type = message_type;
         }
 
-        // https://developers.intercom.com/reference#create-a-conversation
+        if (subject) {
+            requestBody.subject = subject;
+        }
+
+        // https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/createconversation
         const { data } = await context.httpRequest({
             method: 'POST',
             url: 'https://api.intercom.io/conversations',
