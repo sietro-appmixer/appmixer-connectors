@@ -119,6 +119,7 @@ module.exports = {
             outputType
         } = content;
 
+
         if (context.properties.generateOutputPortOptions) {
             return lib.getOutputPortOptions(context, outputType, schema, { label: 'Customers' });
         }
@@ -169,25 +170,20 @@ module.exports = {
         }
 
         // Add creation source filter if provided
-        if (creationSource && creationSource.length > 0) {
+        const normalizedCreationSource = lib.normalizeMultiselectInput(creationSource, context, 'Creation Source');
+        if (normalizedCreationSource.length > 0) {
             filter.creation_source = {
-                values: Array.isArray(creationSource) ? creationSource : [creationSource],
+                values: normalizedCreationSource,
                 rule: 'INCLUDE'
             };
         }
 
         // Add group IDs filter if provided
-        if (groupIds && groupIds.length > 0) {
-            // Handle both string (comma-separated) and array inputs
-            const groupIdsArray = typeof groupIds === 'string'
-                ? groupIds.split(',').map(id => id.trim()).filter(id => id)
-                : Array.isArray(groupIds) ? groupIds : [groupIds];
-
-            if (groupIdsArray.length > 0) {
-                filter.group_ids = {
-                    all: groupIdsArray
-                };
-            }
+        const normalizedGroupIds = lib.normalizeMultiselectInput(groupIds, context, 'Group IDs');
+        if (normalizedGroupIds.length > 0) {
+            filter.group_ids = {
+                all: normalizedGroupIds
+            };
         }
 
         // Build the query object
@@ -230,13 +226,16 @@ module.exports = {
             url: `${baseUrl}/v2/customers/search`,
             headers: {
                 'Authorization': `Bearer ${context.auth.accessToken}`,
-                'Content-Type': 'application/json',
                 'Square-Version': '2025-08-20'
             },
             data: searchBody
         });
 
         let records = data.customers || [];
+
+        if (records.length === 0) {
+            return context.sendJson({}, 'notFound');
+        }
 
         return lib.sendArrayOutput({ context, records, outputType });
     }
