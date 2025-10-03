@@ -61,9 +61,6 @@ describe('Slack RequestApproval', () => {
                     ...context.messages.task.content,
                     taskId: 'T123'
                 });
-                context.callAppmixer.onSecondCall().resolves({
-                    webhookId: 'W123'
-                });
 
                 // Require the component after stubbing
                 const RequestApproval = require('../../../src/appmixer/slack/tasks/RequestApproval/RequestApproval.js');
@@ -95,6 +92,7 @@ describe('Slack RequestApproval', () => {
                 assert.strictEqual(callArgs[5], undefined, 'reply_broadcast should be undefined');
 
                 const expectedDecisionByText = new Date('2053-12-31T10:59:01.000Z').toLocaleString('sv-SE', { timeZone: 'UTC', hour: '2-digit', minute: '2-digit', year: 'numeric', month: '2-digit', day: '2-digit' }).replace('T', ' ');
+                const expectedActionValue = ['T123', new URL(context.getWebhookUrl()).origin].join('|');
                 assert.deepStrictEqual(callArgs[6], {
                     blocks: [
                         { type: 'section', text: { type: 'mrkdwn', text: '*Test Title*\nTest Description' } },
@@ -103,24 +101,11 @@ describe('Slack RequestApproval', () => {
                             { type: 'mrkdwn', text: `*Decision by:* ${expectedDecisionByText}` }
                         ] },
                         { type: 'actions', elements: [
-                            { type: 'button', text: { type: 'plain_text', text: 'Approve' }, style: 'primary', value: 'T123', action_id: 'task_approve' },
-                            { type: 'button', text: { type: 'plain_text', text: 'Reject' }, style: 'danger', value: 'T123', action_id: 'task_reject' }
+                            { type: 'button', text: { type: 'plain_text', text: 'Approve' }, style: 'primary', value: expectedActionValue, action_id: 'task_approve' },
+                            { type: 'button', text: { type: 'plain_text', text: 'Reject' }, style: 'danger', value: expectedActionValue, action_id: 'task_reject' }
                         ] }
                     ]
                 }, 'sendMessage should be called with the correct options');
-
-                // Call to Appmixer to create the webhook
-                assert.deepStrictEqual(context.callAppmixer.secondCall.args[0], {
-                    endPoint: '/plugins/appmixer/slack/tasks/webhooks',
-                    method: 'POST',
-                    body: { url: context.getWebhookUrl(), taskId: 'T123' }
-                }, 'context.callAppmixer should be called with the correct arguments for webhook');
-
-                // context.stateSet should be called once
-                assert(context.stateSet.calledOnce, 'context.stateSet should be called once');
-                const stateSetArgs = context.stateSet.getCall(0).args;
-                assert.strictEqual(stateSetArgs[0], 'W123', 'stateSet should be called with the correct webhook ID');
-                assert.deepStrictEqual(stateSetArgs[1], {}, 'stateSet should be called with an empty object');
             });
 
             it('should throw if the due date is in the past', async () => {
@@ -217,7 +202,6 @@ describe('Slack RequestApproval', () => {
                     approver: 'U222BBBCCC',
                     taskId: 'T999'
                 });
-                context.callAppmixer.onSecondCall().resolves({ webhookId: 'W999' });
 
                 const RequestApproval = require('../../../src/appmixer/slack/tasks/RequestApproval/RequestApproval.js');
                 await RequestApproval.receive(context);

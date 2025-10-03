@@ -10,17 +10,14 @@ const testUtils = require('../../utils.js');
  *  - resubmit-failed-webhooks job finds failed webhooks and re-triggers them
  */
 
-describe('slack-tasks-jobs', () => {
+describe('slack-due-tasks', () => {
 
     let context;
     let dueHandler;
     let resubmitHandler;
-    let triggerWebhooksStub;
     let triggerWebhookStub;
     let taskFindSpy;
-    let webhookFindSpy;
     let setMockTasks;
-    let setMockWebhooks;
     let getSavedTasks;
     // eslint-disable-next-line max-len, one-var
     let utilsPath, taskModelPath, webhookModelPath, jobsPath, jobsUtilsRequirePath, jobsTaskRequirePath, jobsWebhookRequirePath;
@@ -38,14 +35,12 @@ describe('slack-tasks-jobs', () => {
 
         // Stub the utils module used by slack/jobs.js
         utilsPath = path.resolve(__dirname, '../../../src/appmixer/slack/tasks/utils.js');
-        triggerWebhooksStub = sinon.stub().callsFake(async () => [true]);
         triggerWebhookStub = sinon.stub().resolves(true);
         require.cache[require.resolve(utilsPath)] = {
             id: utilsPath,
             filename: utilsPath,
             loaded: true,
             exports: () => ({
-                triggerWebhooks: triggerWebhooksStub,
                 triggerWebhook: triggerWebhookStub
             })
         };
@@ -60,6 +55,9 @@ describe('slack-tasks-jobs', () => {
             setStatus(status) { this.status = status; }
             async save() { savedTasks.push(this); return this; }
             static get STATUS_DUE() { return 'due'; }
+            static get STATUS_ERROR() { return 'error'; }
+            static get STATUS_PENDING() { return 'pending'; }
+            static get collection() { return 'slack_tasks'; }
             static async find(query) { return taskRecords.map(r => new FakeTask(r)); }
         }
         taskFindSpy = sinon.spy(FakeTask, 'find');
@@ -81,26 +79,6 @@ describe('slack-tasks-jobs', () => {
             exports: () => FakeTask
         };
 
-        // Stub SlackWebhookModel
-        webhookModelPath = path.resolve(__dirname, '../../../src/appmixer/slack/tasks/SlackWebhookModel.js');
-        let webhookRecords = [];
-        class FakeWebhook { static get STATUS_FAIL() { return 'fail'; } static async find(query) { return webhookRecords; } }
-        webhookFindSpy = sinon.spy(FakeWebhook, 'find');
-        setMockWebhooks = (arr) => { webhookRecords = arr; };
-        require.cache[require.resolve(webhookModelPath)] = {
-            id: webhookModelPath,
-            filename: webhookModelPath,
-            loaded: true,
-            exports: () => FakeWebhook
-        };
-        jobsWebhookRequirePath = path.join(jobsDir, 'SlackWebhookModel.js');
-        require.cache[jobsWebhookRequirePath] = {
-            id: jobsWebhookRequirePath,
-            filename: jobsWebhookRequirePath,
-            loaded: true,
-            exports: () => FakeWebhook
-        };
-
         // Provide './utils' path expected by slack/jobs.js
         jobsUtilsRequirePath = path.join(jobsDir, 'utils.js');
         require.cache[jobsUtilsRequirePath] = {
@@ -108,7 +86,6 @@ describe('slack-tasks-jobs', () => {
             filename: jobsUtilsRequirePath,
             loaded: true,
             exports: () => ({
-                triggerWebhooks: triggerWebhooksStub,
                 triggerWebhook: triggerWebhookStub
             })
         };
@@ -152,7 +129,7 @@ describe('slack-tasks-jobs', () => {
         assert(saved.every(t => t.status === 'due'));
 
         // Webhooks should be triggered once per task
-        assert.equal(triggerWebhooksStub.callCount, 2);
+        assert.equal(triggerWebhookStub.callCount, 2);
     });
 
     it('should handle no due tasks gracefully', async () => {
@@ -160,21 +137,80 @@ describe('slack-tasks-jobs', () => {
         await dueHandler();
         const saved = getSavedTasks();
         assert.equal(saved.length, 0);
-        assert.equal(triggerWebhooksStub.callCount, 0);
+        assert.equal(triggerWebhookStub.callCount, 0);
     });
 
     it('should resubmit failed webhooks', async () => {
-        const failedWebhooks = [{ webhookId: 'w1' }, { webhookId: 'w2' }];
-        setMockWebhooks(failedWebhooks);
+
+        // Prepare two tasks in error state: one will succeed when retried, one will fail
+        const errorTasks = [
+            { taskId: 'e1', status: 'error' },
+            { taskId: 'e2', status: 'error' }
+        ];
+        setMockTasks(errorTasks);
+
+        // Configure triggerWebhook: succeed for first, fail for second
+        triggerWebhookStub.onCall(0).resolves(true);
+        triggerWebhookStub.onCall(1).rejects(new Error('webhook failed'));
 
         await resubmitHandler();
 
-        assert(webhookFindSpy.calledOnce);
-        const queryArg = webhookFindSpy.getCall(0).args[0];
-        // Should look for failed status
-        assert.equal(queryArg.status, 'fail');
+        // Verify Task.find called for error status
+        assert(taskFindSpy.called);
 
-        // Each failed webhook should be retriggered
-        assert.equal(triggerWebhookStub.callCount, failedWebhooks.length);
+        const saved = getSavedTasks();
+        // First task should have been set to pending then saved, second should be reverted back to error and saved
+        const sbyId = id => saved.find(t => t.taskId === id) || null;
+        const firstSaved = sbyId('e1');
+        const secondSaved = sbyId('e2');
+        assert(firstSaved, 'first task was not saved');
+        assert(secondSaved, 'second task was not saved');
+
+        // First should be pending, second should be error
+        assert.equal(firstSaved.status, 'pending');
+        assert.equal(secondSaved.status, 'error');
+
+        // triggerWebhook should be called twice
+        assert.equal(triggerWebhookStub.callCount, 2);
+
+    });
+
+    it('should handle no failed webhooks gracefully', async () => {
+        setMockTasks([]);
+        await resubmitHandler();
+        const saved = getSavedTasks();
+        assert.equal(saved.length, 0);
+        assert.equal(triggerWebhookStub.callCount, 0);
+    });
+
+    it('should remove tasks older than 60 days via deleteMany', async () => {
+        // Arrange: create 10 tasks all on the same day
+        const clock = sinon.useFakeTimers(new Date('2025-01-01T00:00:00Z').getTime());
+        const tenTasks = Array.from({ length: 10 }).map((_, i) => ({
+            taskId: `old-${i + 1}`,
+            status: 'pending',
+            createdAt: new Date(),
+            decisionBy: new Date()
+        }));
+        setMockTasks(tenTasks);
+
+        // Stub deleteMany to return the number of deleted tasks
+        const coll = context.db.collection();
+        coll.deleteMany.resolves({ deletedCount: tenTasks.length });
+
+        // Act: jump ahead by 61 days to trigger cleanup of >60 days old tasks
+        clock.tick(61 * 24 * 60 * 60 * 1000);
+        await dueHandler();
+
+        // Assert the correct collection and filter used
+        assert(context.db.collection.calledWith('slack_tasks'));
+        assert.equal(coll.deleteMany.callCount, 1);
+        const filterArg = coll.deleteMany.getCall(0).args[0];
+        assert(filterArg && filterArg.createdAt && filterArg.createdAt.$lt instanceof Date);
+        const expectedCutoff = new Date(Date.now());
+        expectedCutoff.setDate(expectedCutoff.getDate() - 60);
+        assert.equal(filterArg.createdAt.$lt.getTime(), expectedCutoff.getTime());
+
+        clock.restore();
     });
 });
