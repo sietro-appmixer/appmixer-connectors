@@ -1,6 +1,6 @@
 const assert = require('assert');
 const sinon = require('sinon');
-const testUtils = require('../../utils.js');
+const testUtils = require('../../../../../../test/utils.js');
 
 /**
  * Tests the scenario:
@@ -73,7 +73,7 @@ describe('Slack Tasks interactions - AuthHub forwarding to tenant', () => {
             }
         });
 
-        const rootTaskModelPath = require.resolve('../../../src/appmixer/slack/SlackTaskModel.js');
+        const rootTaskModelPath = require.resolve('../../../SlackTaskModel.js');
         require.cache[rootTaskModelPath] = createTaskModuleStub(rootTaskModelPath);
 
         // Stub slack/tasks/utils.js with a spy-able triggerWebhook using minimal export
@@ -84,12 +84,12 @@ describe('Slack Tasks interactions - AuthHub forwarding to tenant', () => {
             exports: () => ({ triggerWebhook: utilsTriggerWebhookStub, getTask: async () => ({}) })
         });
         utilsTriggerWebhookStub = sinon.stub().resolves();
-        const rootUtilsPath = require.resolve('../../../src/appmixer/slack/taskUtils.js');
+        const rootUtilsPath = require.resolve('../../../taskUtils.js');
         require.cache[rootUtilsPath] = createUtilsModuleStub(rootUtilsPath);
 
         // Prepare routes module and common slack lib; ensure signature validation passes by default
-        routes = require('../../../src/appmixer/slack/routes-tasks.js');
-        slackLib = require('../../../src/appmixer/slack/lib.js');
+        routes = require('../../../routes-tasks.js');
+        slackLib = require('../../../lib.js');
         // slackLib?.isValidPayload?.restore();
         sinon.stub(slackLib, 'isValidPayload').returns(true);
 
@@ -116,7 +116,7 @@ describe('Slack Tasks interactions - AuthHub forwarding to tenant', () => {
         delete process.env.AUTH_HUB_URL;
         delete process.env.AUTH_HUB_TOKEN;
         // Clean module cache of lib stubs if needed
-        ['../../../src/appmixer/slack/SlackTaskModel.js', '../../../src/appmixer/slack/taskUtils.js']
+        ['../../../SlackTaskModel.js', '../../../taskUtils.js']
             .forEach(modulePath => {
                 try { delete require.cache[require.resolve(modulePath)]; } catch (_) {}
             });
@@ -124,7 +124,7 @@ describe('Slack Tasks interactions - AuthHub forwarding to tenant', () => {
 
     it('forwards Approve to tenant and tenant triggers webhook (end-to-end)', async () => {
         // Prepare a pending task directly in the in-memory model
-        const Task = require('../../../src/appmixer/slack/SlackTaskModel.js')(tenantContext);
+        const Task = require('../../../SlackTaskModel.js')(tenantContext);
         const created = await new Task().populate({
             taskId: 'TS-42',
             title: 'Test Task',

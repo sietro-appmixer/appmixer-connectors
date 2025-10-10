@@ -1,7 +1,7 @@
 const assert = require('assert');
 const sinon = require('sinon');
 const path = require('path');
-const testUtils = require('../../utils.js');
+const testUtils = require('../../../../../../test/utils.js');
 
 /**
  * Tests for Slack jobs (src/appmixer/slack/jobs.js)
@@ -43,11 +43,11 @@ describe('slack-due-tasks', () => {
             })
         });
         triggerWebhookStub = sinon.stub().resolves(true);
-        rootTaskUtilsPath = path.resolve(__dirname, '../../../src/appmixer/slack/taskUtils.js');
+        rootTaskUtilsPath = path.resolve(__dirname, '../../../taskUtils.js');
         require.cache[rootTaskUtilsPath] = createUtilsStub(rootTaskUtilsPath);
 
         // Stub SlackTaskModel
-        taskModelPath = path.resolve(__dirname, '../../../src/appmixer/slack/SlackTaskModel.js');
+        taskModelPath = path.resolve(__dirname, '../../../SlackTaskModel.js');
         let taskRecords = [];
         let savedTasks = [];
         class FakeTask {
@@ -86,7 +86,7 @@ describe('slack-due-tasks', () => {
         require.cache[jobsUtilsRequirePath] = createUtilsStub(jobsUtilsRequirePath);
 
         // Register the jobs
-        jobsPath = path.resolve(__dirname, '../../../src/appmixer/slack/jobs.js');
+        jobsPath = path.resolve(__dirname, '../../../jobs.js');
         delete require.cache[require.resolve(jobsPath)];
         const jobs = require(jobsPath);
         await jobs(context);
