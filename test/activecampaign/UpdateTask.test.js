@@ -80,7 +80,7 @@ describe('UpdateTask Component', function() {
 
         try {
             await UpdateTask.receive(context);
-            
+
             // If we reach here with real credentials, check the output
             if (context.sendJson.called) {
                 const [output, outputPort] = context.sendJson.firstCall.args;

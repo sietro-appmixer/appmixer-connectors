@@ -63,7 +63,7 @@ describe('DeleteDeal Component', function() {
 
         try {
             await DeleteDeal.receive(context);
-            
+
             // Even if the deal doesn't exist, the component should return success
             assert.ok(context.sendJson.calledOnce);
             const [output, outputPort] = context.sendJson.firstCall.args;

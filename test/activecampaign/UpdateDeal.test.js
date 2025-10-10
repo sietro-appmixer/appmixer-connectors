@@ -70,7 +70,7 @@ describe('UpdateDeal Component', function() {
 
         try {
             await UpdateDeal.receive(context);
-            
+
             // If we reach here with real credentials, check the output
             if (context.sendJson.called) {
                 const [output, outputPort] = context.sendJson.firstCall.args;

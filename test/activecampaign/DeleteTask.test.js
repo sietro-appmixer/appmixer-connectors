@@ -63,7 +63,7 @@ describe('DeleteTask Component', function() {
 
         try {
             await DeleteTask.receive(context);
-            
+
             // Even if the task doesn't exist, the component should return success
             assert.ok(context.sendJson.calledOnce);
             const [output, outputPort] = context.sendJson.firstCall.args;
