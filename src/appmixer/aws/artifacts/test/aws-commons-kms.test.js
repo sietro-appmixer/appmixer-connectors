@@ -7,8 +7,8 @@ const path = require('path');
 const fs = require('fs');
 
 let AWS_LOCAL;
-if (fs.existsSync(path.join(__dirname, '../../src/appmixer/aws/node_modules/aws-sdk'))) {
-    AWS_LOCAL = require('../../src/appmixer/aws/node_modules/aws-sdk');
+if (fs.existsSync(path.join(__dirname, '../../node_modules/aws-sdk'))) {
+    AWS_LOCAL = require('../../node_modules/aws-sdk');
 }
 
 function buildContext(properties = {}) {
@@ -29,17 +29,20 @@ function buildContext(properties = {}) {
 let snsStub; let s3Stub; let kmsStub;
 
 function resetStubs() {
+    // Restore all sinon stubs before creating new ones
+    sinon.restore();
+
     snsStub = { createTopic: sinon.stub(), setTopicAttributes: sinon.stub(), subscribe: sinon.stub() };
     s3Stub = { getBucketNotificationConfiguration: sinon.stub(), putBucketNotificationConfiguration: sinon.stub() };
     kmsStub = { describeKey: sinon.stub(), listKeyPolicies: sinon.stub(), getKeyPolicy: sinon.stub() };
 
-    [AWS, AWS_LOCAL].forEach(A => {
-        if (!A) return;
-        sinon.stub(A, 'SNS').callsFake(() => snsStub);
-        sinon.stub(A, 'S3').callsFake(() => s3Stub);
-        sinon.stub(A, 'Lambda').callsFake(() => ({ }));
-        sinon.stub(A, 'KMS').callsFake(() => kmsStub);
-    });
+    // Stub the connector-local aws-sdk instance (aws-commons uses this)
+    // If AWS_LOCAL is not available (e.g., in CI without local node_modules), stub the global AWS instead
+    const awsToStub = AWS_LOCAL || AWS;
+    sinon.stub(awsToStub, 'SNS').callsFake(() => snsStub);
+    sinon.stub(awsToStub, 'S3').callsFake(() => s3Stub);
+    sinon.stub(awsToStub, 'Lambda').callsFake(() => ({ }));
+    sinon.stub(awsToStub, 'KMS').callsFake(() => kmsStub);
 }
 
 function restoreStubs() { sinon.restore(); }
@@ -62,10 +65,15 @@ async function expectCancel(promise, msgFragment) {
 
 describe('aws-commons KMS validation', () => {
 
+    beforeEach(() => {
+        resetStubs();
+    });
+
     afterEach(() => restoreStubs());
 
+    after(() => restoreStubs());
+
     it('creates encrypted topic when kms key alias policy allows S3', async () => {
-        resetStubs();
         // KMS success path stubs
         kmsStub.describeKey.returns({ promise: () => Promise.resolve({ KeyMetadata: { KeyId: '1234-uuid-key' } }) });
         kmsStub.listKeyPolicies.returns({ promise: () => Promise.resolve({ PolicyNames: ['default'] }) });
@@ -85,7 +93,7 @@ describe('aws-commons KMS validation', () => {
         snsStub.setTopicAttributes.returns({ promise: () => Promise.resolve() });
         snsStub.subscribe.returns({ promise: () => Promise.resolve({ SubscriptionArn: 'sub-arn' }) });
 
-        const commons = require('../../src/appmixer/aws/aws-commons');
+        const commons = require('../../aws-commons');
         const context = buildContext({ bucket: 'bucket-a', region: 'us-east-1' });
 
         await commons.registerWebhook(context, { topicPrefix: 'Obj_', eventPrefix: 's3:ObjectCreated:', eventType: 's3:ObjectCreated:*', kmsMasterKeyId: 'alias/my-key' });
@@ -96,30 +104,27 @@ describe('aws-commons KMS validation', () => {
     });
 
     it('rejects invalid kmsMasterKeyId format', async () => {
-        resetStubs();
         s3Stub.getBucketNotificationConfiguration.returns({
             promise: () => Promise.resolve({ TopicConfigurations: [] })
         });
-        const commons = require('../../src/appmixer/aws/aws-commons');
+        const commons = require('../../aws-commons');
         const context = buildContext({ bucket: 'bkt', region: 'us-east-1' });
         await expectCancel(commons.registerWebhook(context, { topicPrefix: 'X_', eventPrefix: 's3:ObjectCreated:', eventType: 's3:ObjectCreated:*', kmsMasterKeyId: 'bad-format-key' }), 'kmsMasterKeyId format is invalid');
         assert.strictEqual(snsStub.createTopic.called, false, 'Should not attempt createTopic on invalid format');
     });
 
     it('rejects when describeKey fails', async () => {
-        resetStubs();
         kmsStub.describeKey.returns({ promise: () => Promise.reject(new Error('NotFound')) });
         s3Stub.getBucketNotificationConfiguration.returns({
             promise: () => Promise.resolve({ TopicConfigurations: [] })
         });
-        const commons = require('../../src/appmixer/aws/aws-commons');
+        const commons = require('../../aws-commons');
         const context = buildContext({ bucket: 'bucket-a', region: 'us-east-1' });
         await expectCancel(commons.registerWebhook(context, { topicPrefix: 'Obj_', eventPrefix: 's3:ObjectCreated:', eventType: 's3:ObjectCreated:*', kmsMasterKeyId: 'alias/my-key' }), 'KMS key not found');
         assert.strictEqual(snsStub.createTopic.called, false, 'createTopic should not be called if describeKey fails');
     });
 
     it('rejects when key policy missing S3 statement', async () => {
-        resetStubs();
         kmsStub.describeKey.returns({ promise: () => Promise.resolve({ KeyMetadata: { KeyId: 'key-uuid' } }) });
         kmsStub.listKeyPolicies.returns({ promise: () => Promise.resolve({ PolicyNames: ['default'] }) });
         kmsStub.getKeyPolicy.returns({ promise: () => Promise.resolve({ Policy: JSON.stringify({
@@ -134,20 +139,19 @@ describe('aws-commons KMS validation', () => {
         s3Stub.getBucketNotificationConfiguration.returns({
             promise: () => Promise.resolve({ TopicConfigurations: [] })
         });
-        const commons = require('../../src/appmixer/aws/aws-commons');
+        const commons = require('../../aws-commons');
         const context = buildContext({ bucket: 'bkt', region: 'us-east-1' });
         await expectCancel(commons.registerWebhook(context, { topicPrefix: 'T_', eventPrefix: 's3:ObjectCreated:', eventType: 's3:ObjectCreated:*', kmsMasterKeyId: 'alias/my-key' }), 'KMS key policy missing required S3 permissions');
     });
 
     it('rejects when key policy JSON invalid', async () => {
-        resetStubs();
         kmsStub.describeKey.returns({ promise: () => Promise.resolve({ KeyMetadata: { KeyId: 'key-uuid' } }) });
         kmsStub.listKeyPolicies.returns({ promise: () => Promise.resolve({ PolicyNames: ['default'] }) });
         kmsStub.getKeyPolicy.returns({ promise: () => Promise.resolve({ Policy: '{not-json' }) });
         s3Stub.getBucketNotificationConfiguration.returns({
             promise: () => Promise.resolve({ TopicConfigurations: [] })
         });
-        const commons = require('../../src/appmixer/aws/aws-commons');
+        const commons = require('../../aws-commons');
         const context = buildContext({ bucket: 'bkt', region: 'us-east-1' });
         await expectCancel(commons.registerWebhook(context, { topicPrefix: 'T_', eventPrefix: 's3:ObjectCreated:', eventType: 's3:ObjectCreated:*', kmsMasterKeyId: 'alias/my-key' }), 'Unable to parse KMS key policy JSON');
     });
