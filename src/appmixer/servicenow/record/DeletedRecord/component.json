@@ -1,9 +1,8 @@
 {
-	"name": "appmixer.servicenow.record.NewRecord",
+	"name": "appmixer.servicenow.record.DeletedRecord",
 	"author": "Appmixer <info@appmixer.com>",
-	"description": "Triggers when a record is inserted into a specified table.",
+	"description": "Triggers when a record is deleted from the specified table.",
 	"version": "1.0.0",
-	"private": false,
 	"webhook": true,
 	"trigger": true,
 	"auth": {
@@ -26,7 +25,7 @@
 					"type": "text",
 					"label": "Table Name",
 					"index": 1,
-					"tooltip": "Enter the name of the table to monitor for new records. Common tables include 'incident', 'change_request', 'problem', 'task', or any custom table name in your ServiceNow instance."
+					"tooltip": "Enter the name of the table to monitor for deleted records. Common tables include 'incident', 'change_request', 'problem', 'task', or any custom table name in your ServiceNow instance."
 				}
 			}
 		}

@@ -1,6 +1,6 @@
 'use strict';
 
-const eventName = (context) => `${(context.auth.instance)}.${(context.properties.tableName)}.insert`;
+const eventName = (context) => `${(context.auth.instance)}.${(context.properties.tableName)}.delete`;
 
 module.exports = {
 
