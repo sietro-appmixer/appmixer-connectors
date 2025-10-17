@@ -32,7 +32,7 @@
             "inputs": {
                 "stageName": {
                     "type": "text",
-                    "title": "Stage Name",
+                    "label": "Stage Name",
                     "tooltip": "Opportunity stage to trigger on.",
                     "index": 1,
                     "source": {
