@@ -80,11 +80,33 @@ module.exports = {
 
     // API
     api: {
-        async getObjectFields(context, { objectName }) {
-            const { data } = await this.salesForceRq(context, {
-                action: `sobjects/${objectName}/describe`
-            });
-            return data?.fields || [];
+        async getObjectFields(context, { objectName, cache = false }) {
+            let fields = [];
+
+            if (!cache) {
+                const { data } = await this.salesForceRq(context, { action: `sobjects/${objectName}/describe` });
+                return data?.fields || [];
+            }
+
+            const objectPropertiesCacheTTL = context.config.objectPropertiesCacheTTL || (5 * 60 * 1000);
+            const cacheKey = 'salesforce_properties_objectFields_' + objectName + '_' + context.auth.userId + context.auth.profileInfo.email;
+            let lock;
+            try {
+                lock = await context.lock(cacheKey);
+                const cached = await context.staticCache.get(cacheKey);
+                if (cached) {
+                    fields = cached;
+                } else {
+                    const { data } = await this.salesForceRq(context, { action: `sobjects/${objectName}/describe` });
+
+                    fields = data?.fields || [];
+
+                    await context.staticCache.set(cacheKey, fields, objectPropertiesCacheTTL);
+                }
+                return fields;
+            } finally {
+                lock?.unlock();
+            }
         },
 
         async createObject(context, { objectName, json }) {
@@ -100,13 +122,13 @@ module.exports = {
             return data;
         },
 
-        async salesForceRq(context, { method = 'GET', headers = {}, data, action }) {
+        async salesForceRq(context, { method = 'GET', headers = {}, data, action, service = 'data' }) {
 
             const version = `v${context.config.apiVersion || DEFAULT_API_VERSION}`;
 
             return await context.httpRequest({
                 method,
-                url: `${context.profileInfo.instanceUrl}/services/data/${version}/${action}`,
+                url: `${context.profileInfo.instanceUrl}/services/${service}/${version}/${action}`,
                 data,
                 headers: {
                     'Authorization': `Bearer ${context.auth.accessToken}`,

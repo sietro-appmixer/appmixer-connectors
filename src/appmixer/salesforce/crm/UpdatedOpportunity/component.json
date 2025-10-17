@@ -1,7 +1,7 @@
 {
-    "name": "appmixer.salesforce.crm.NewOpportunity",
-    "author": "Tomasz Hencel <thencel@ntrc.eu>",
-    "description": "This trigger fires every time a new opportunity is added.",
+    "name": "appmixer.salesforce.crm.UpdatedOpportunity",
+    "author": "Appmixer <info@appmixer.ai>",
+    "description": "Trigger when Opportunity reaches specific stage.",
     "private": false,
     "auth": {
         "service": "appmixer:salesforce"
@@ -15,6 +15,42 @@
         "service": "1.1.2"
     },
     "tick": true,
+    "trigger": true,
+    "properties": {
+        "schema": {
+            "type": "object",
+            "properties": {
+                "stageName": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "stageName"
+            ]
+        },
+        "inspector": {
+            "inputs": {
+                "stageName": {
+                    "type": "text",
+                    "title": "Stage Name",
+                    "tooltip": "Opportunity stage to trigger on.",
+                    "index": 1,
+                    "source": {
+                        "url": "/component/appmixer/salesforce/crm/GetObjectFields?outPort=out",
+                        "data": {
+                            "messages": {
+                                "in": {
+                                    "objectName": "Opportunity",
+                                    "fieldName": "StageName"
+                                }
+                            },
+                            "transform": "./transformers#picklistValuesToSelectArray"
+                        }
+                    }
+                }
+            }
+        }
+    },
     "outPorts": [
         {
             "name": "opportunity",
@@ -22,7 +58,9 @@
                 "url": "/component/appmixer/salesforce/crm/GetObjectFields?outPort=out",
                 "data": {
                     "messages": {
-                        "in/objectName": "Opportunity"
+                        "in": {
+                            "objectName": "Opportunity"
+                        }
                     },
                     "transform": "./transformers#fieldsToSelectOptions"
                 }
