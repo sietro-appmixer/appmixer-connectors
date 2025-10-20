@@ -21,7 +21,7 @@
             "Added validation for required fields in components."
         ],
         "1.0.7": [
-            "Removed Promise dependency."
+            "Removed Bluebird dependency."
         ]
     }
 }
