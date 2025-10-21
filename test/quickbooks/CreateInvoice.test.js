@@ -1,5 +1,5 @@
 const assert = require('assert');
-const testUtils = require('../../../utils.js');
+const testUtils = require('../utils.js');
 
 describe('CreateInvoice', function() {
 
@@ -15,7 +15,7 @@ describe('CreateInvoice', function() {
 
     it('should fail with no line items', async function() {
 
-        const action = require('../../../../src/appmixer/quickbooks/accounting/CreateInvoice/CreateInvoice');
+        const action = require('../../src/appmixer/quickbooks/accounting/CreateInvoice/CreateInvoice');
 
         await assert.rejects(
             async () => {
