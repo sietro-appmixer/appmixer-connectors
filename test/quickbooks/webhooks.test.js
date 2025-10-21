@@ -20,25 +20,20 @@ const INVOICE_B2_CREATED = { id: '1004', name: 'Invoice', operation: 'Create', l
 
 describe('Quickbooks webhooks', function() {
 
-    let context; let req; let h;
+    let context;
+    let req;
+    let h;
 
     beforeEach(function() {
 
         context = {
             ...testUtils.createMockContext(),
-            componentId: 'componentId',
-            flowId: 'flowId',
-            service: {
-                stateAddToSet: sinon.stub(),
-                stateGet: sinon.stub()
-            },
             config: {
                 webhookVerifierToken: 'webhooksVerifier'
             },
             profileInfo: {
                 companyId: 'companyId'
-            },
-            response: sinon.spy()
+            }
         };
         // Hapi request object
         req = {
@@ -260,21 +255,9 @@ describe('NewCustomer component', function() {
 
         context = {
             ...testUtils.createMockContext(),
-            componentId: 'componentId',
-            flowId: 'flowId',
-            service: {
-                stateAddToSet: sinon.stub(),
-                stateGet: sinon.stub()
-            },
-            config: {
-                webhookVerifierToken: 'webhooksVerifier'
-            },
             profileInfo: {
                 companyId: 'companyId'
-            },
-            httpRequest: sinon.stub(),
-            sendArray: sinon.spy(),
-            response: sinon.spy()
+            }
         };
     });
 

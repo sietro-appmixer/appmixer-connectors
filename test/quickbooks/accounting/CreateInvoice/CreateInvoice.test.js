@@ -1,16 +1,17 @@
 const assert = require('assert');
+const testUtils = require('../../../utils.js');
 
 describe('CreateInvoice', function() {
 
-    const context = {
-        componentId: 'mock',
-        flowDescriptor: { 'mock': { label: 'label' } },
-        profileInfo: { companyId: 'companyId' },
-        config: {},
-        log: console.log,
-        messages: { in: { content: {} } },
-        CancelError: Error
-    };
+    let context;
+
+    beforeEach(function() {
+        context = {
+            ...testUtils.createMockContext(),
+            profileInfo: { companyId: 'companyId' },
+            messages: { in: { content: {} } }
+        };
+    });
 
     it('should fail with no line items', async function() {
 
@@ -20,7 +21,10 @@ describe('CreateInvoice', function() {
             async () => {
                 await action.receive(context);
             },
-            context.CancelError('Invalid JSON in "Line Items JSON"')
+            (err) => {
+                return err instanceof context.CancelError &&
+                    err.message === 'Invalid JSON in "Line Items JSON"';
+            }
         );
     });
 });
