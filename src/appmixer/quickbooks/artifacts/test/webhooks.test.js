@@ -1,8 +1,8 @@
-const { webhookHandler } = require('../../src/appmixer/quickbooks/routes');
+const { webhookHandler } = require('../../routes');
 const assert = require('assert');
 const sinon = require('sinon');
 const crypto = require('crypto');
-const testUtils = require('../utils.js');
+const testUtils = require('../../../../../test/utils.js');
 
 // Fixtures
 const NOW = new Date();
@@ -246,7 +246,7 @@ describe('Quickbooks webhooks', function() {
 
 describe('NewCustomer component', function() {
 
-    const { receive } = require('../../src/appmixer/quickbooks/accounting/NewCustomer/NewCustomer');
+    const { receive } = require('../../accounting/NewCustomer/NewCustomer');
     let context;
 
     const QUICKBOOKS_CONTACT_A = { Id: '1', Active: true, FullyQualifiedName: 'Andy' };
@@ -310,8 +310,8 @@ describe('NewCustomer component', function() {
             }]
         };
 
-        // Xero responses
-        // Expecting 3 calls to Xero with 40, 40 and 20 IDs
+        // QuickBooks responses
+        // Expecting 3 calls to QuickBooks with 40, 40 and 20 IDs
         context.httpRequest = sinon.stub()
             .onCall(0).resolves(
                 { QueryResponse: { Customer: events.eventNotifications[0].dataChangeEvent.entities.slice(0, 40) } })
@@ -329,7 +329,7 @@ describe('NewCustomer component', function() {
         assert(context.lock.calledOnce);
         assert(context.lock().unlock.calledOnce);
 
-        // Check HTTP calls to Quickbooks with IDs in "IN" clause
+        // Check HTTP calls to QuickBooks with IDs in "IN" clause
         assert.equal(context.httpRequest.callCount, 3);
         // Check the first call
         const args1 = context.httpRequest.args[0];
