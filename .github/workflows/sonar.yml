@@ -5,7 +5,7 @@ on:
   push:
     branches:
       - dev
-      # - sonar*
+      - sonar*
 
 jobs:
   sonarqube:
@@ -31,17 +31,42 @@ jobs:
         run: ./scripts/npm_install.sh
       - name: Run unit tests and coverage
         run: npm run test-unit-coverage
+      - name: Collect coverage reports
+        id: coverage_reports
+        run: |
+          set -euo pipefail
+
+          reports=""
+
+          if [ -f coverage/lcov.info ]; then
+              reports="coverage/lcov.info"
+          fi
+
+          while IFS= read -r file; do
+              if [ -z "$reports" ]; then
+                  reports="$file"
+              else
+                  reports="$reports,$file"
+              fi
+          done < <(find src/appmixer -path '*artifacts/test*/coverage/lcov.info' -type f)
+
+          if [ -z "$reports" ]; then
+              echo "No coverage reports found" >&2
+          fi
+
+          echo "paths=$reports" >> "$GITHUB_OUTPUT"
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v4.2.1
         with:
           args: >
             -Dsonar.projectKey=clientIO_appmixer-connectors_AY7J_O6GZsPR2eThxIf0
             -Dsonar.sources=src
-            # Include both legacy test/ folder and the new per-connector artifacts test folders
-            -Dsonar.tests=test,src/appmixer/**/artifacts/test/**
+            # Include both legacy test/ folder and mark the per-connector artifacts tests via inclusions
+            -Dsonar.tests=test
+            -Dsonar.test.inclusions=src/appmixer/**/artifacts/test/**/*.test.js
             # Include global lcov and any per-connector lcovs produced under artifacts/test
-            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info,src/appmixer/**/artifacts/test/**/coverage/lcov.info
-            -Dsonar.exclusions=test/**,src/appmixer/**/artifacts/test/**,src/appmixer/utils/chat/chat.bundle.js
+            -Dsonar.javascript.lcov.reportPaths=${{ steps.coverage_reports.outputs.paths }}
+            -Dsonar.exclusions=test/**,src/appmixer/**/artifacts/test/**,**/chat.bundle.js
             -Dsonar.coverage.exclusions=node_modules/**,test/**,src/appmixer/**/artifacts/test/**
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
